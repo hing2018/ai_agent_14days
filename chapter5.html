@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第五章：高階心法與畢業專案</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #58cc02;
+    --green-dark: #46a302;
+    --blue: #1cb0f6;
+    --orange: #ff9600;
+    --red: #ff4b4b;
+    --purple: #ce82ff;
+    --text: #3c3c3c;
+    --text-light: #8a8a8a;
+    --bg: #fffdf8;
+    --card: #ffffff;
+    --line: #e5e5e5;
+    --soft: #f7f7f7;
+  }
+  body {
+    font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #e9f2fd 0%, var(--bg) 45%, var(--bg) 100%) fixed; color: var(--text);
+    margin: 0; padding: 40px 20px; max-width: 900px; margin-left: auto; margin-right: auto;
+    font-size: 16px; line-height: 1.8;
+  }
+  h1, h2, h3, h4 { line-height: 1.4; }
+
+  .header-card {
+    background: linear-gradient(135deg, #e8f3fe 0%, #d3e7fb 100%);
+    border: 2px solid #b8d6f0; border-radius: 24px; padding: 40px 36px; text-align: center;
+    margin-bottom: 36px; color: #1f5f8b;
+  }
+  .header-title { font-size: 34px; font-weight: 800; margin: 0 0 10px; letter-spacing: 1px; color: #175a8f; }
+  .header-subtitle { font-size: 18px; margin: 0; opacity: 0.9; }
+  .badge-bar { margin-top: 16px; }
+  .badge {
+    display: inline-block; background: rgba(31,95,139,0.12); color: #1f5f8b;
+    border: 1px solid rgba(31,95,139,0.3);
+    padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin: 4px; letter-spacing: 0.5px;
+  }
+
+  .progress-section { margin-bottom: 32px; }
+  .progress-label { font-size: 14px; color: var(--text-light); margin-bottom: 8px; font-weight: 600; }
+  .progress-bar-bg { background: #ececec; border-radius: 999px; height: 26px; overflow: hidden; position: relative; }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px; background: linear-gradient(90deg, #1cb0f6, #58c9f7);
+    display: flex; align-items: center; padding-left: 16px; font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .progress-steps { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-light); font-weight: 600; }
+  .progress-steps span.done { color: var(--green); }
+
+  .day-card {
+    background: var(--card); border: 2px solid var(--line); border-radius: 20px;
+    padding: 30px; margin-bottom: 32px;
+  }
+  .day-card.day12 { border-top: 6px solid var(--purple); }
+  .day-card.day13 { border-top: 6px solid var(--blue); }
+  .day-header { margin-bottom: 20px; border-bottom: 2px dashed var(--line); padding-bottom: 14px; }
+  .day-title { font-size: 24px; font-weight: 800; margin: 0; }
+  .day-subtitle { font-size: 15px; color: var(--text-light); margin-top: 4px; }
+
+  .concept-card {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .concept-num {
+    display: inline-block; background: var(--green); color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; text-align: center;
+    line-height: 40px; font-size: 18px; font-weight: 800; margin-right: 12px; vertical-align: middle;
+  }
+  .concept-title { font-size: 21px; font-weight: 800; color: var(--text); vertical-align: middle; }
+  .metaphor-tag {
+    display: inline-block; background: #eafaf0; color: var(--green-dark);
+    padding: 4px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .concept-text { color: var(--text); font-size: 16px; margin: 12px 0; }
+  .highlight { color: var(--green-dark); font-weight: 700; }
+  .key-point { color: var(--orange); font-weight: 700; }
+
+  .compare-box { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .compare-col {
+    flex: 1 1 260px; background: var(--card); border-radius: 14px; padding: 18px;
+    border: 1px solid var(--line); min-width: 240px;
+  }
+  .compare-col h4 { margin: 0 0 10px; font-size: 17px; font-weight: 800; }
+  .compare-col ul { margin: 0; padding-left: 20px; }
+  .compare-col li { font-size: 15px; margin-bottom: 6px; }
+
+  .flow-diagram {
+    background: var(--card); border-radius: 14px; padding: 24px; margin: 16px 0;
+    text-align: center; border: 1px solid var(--line);
+  }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--soft); border: 2px solid var(--green); border-radius: 14px;
+    padding: 14px 18px; font-size: 16px; font-weight: 800; color: var(--text);
+    min-width: 110px; text-align: center;
+  }
+  .flow-arrow { font-size: 22px; color: var(--text-light); margin: 0 4px; flex-shrink: 0; }
+  .flow-label { font-size: 13px; color: var(--text-light); display: block; margin-top: 4px; font-weight: 400; }
+
+  .rpg-stat { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .rpg-stat-item {
+    flex: 1 1 200px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; text-align: center; min-width: 180px;
+  }
+  .rpg-stat-label { font-size: 14px; color: var(--text-light); font-weight: 700; letter-spacing: 0.5px; }
+  .rpg-stat-value { font-size: 22px; font-weight: 800; color: var(--orange); margin: 6px 0; }
+  .rpg-stat-bar { height: 10px; background: #ececec; border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .rpg-stat-bar-fill { height: 100%; border-radius: 999px; }
+  .rpg-stat-bar-fill.hp { background: var(--red); }
+  .rpg-stat-bar-fill.mp { background: var(--purple); }
+  .rpg-stat-bar-fill.sp { background: var(--green); }
+
+  .example-box {
+    background: #fff8e8; border-left: 5px solid var(--orange);
+    padding: 14px 16px; font-size: 15px; border-radius: 0 12px 12px 0; margin-top: 10px;
+  }
+  .example-title { color: var(--orange); font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+
+  .practice-box {
+    background: #eafaf0; border: 2px solid var(--green); border-radius: 16px; padding: 24px; margin: 18px 0;
+  }
+  .practice-title { color: var(--green); font-size: 20px; font-weight: 800; margin: 0 0 14px; }
+  .practice-box p { color: var(--text); }
+  .step-list { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    counter-increment: step; padding: 12px 14px 12px 64px; margin-bottom: 8px;
+    background: var(--card); border-radius: 12px; font-size: 15px; position: relative;
+  }
+  .step-list li::before {
+    content: "Step " counter(step); position: absolute; left: 12px; top: 12px;
+    background: var(--green); color: #fff; font-size: 12px; font-weight: 800;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .screenshot-frame {
+    background: #fff; border: 2px dashed #d0d0d0; border-radius: 14px;
+    min-height: 130px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-light); font-size: 15px; margin: 12px 0;
+  }
+
+  .goalspectrum {
+    display: flex; flex-direction: column; gap: 12px; margin: 16px 0;
+  }
+  .spec-row {
+    display: flex; align-items: center; gap: 12px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px;
+  }
+  .spec-level { font-size: 15px; font-weight: 800; color: #fff; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+  .spec-bar { height: 12px; border-radius: 999px; flex: 1; min-width: 60px; }
+
+  .challenge-box {
+    background: #fff7ea; border: 3px solid var(--orange); border-radius: 20px;
+    padding: 28px; margin: 24px 0;
+  }
+  .challenge-title { color: var(--orange); font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+  .challenge-subtitle { color: var(--text-light); font-size: 16px; margin-bottom: 16px; }
+  .challenge-task {
+    background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    border-left: 5px solid var(--orange);
+  }
+  .challenge-task h4 { margin: 0 0 6px; color: var(--orange); font-size: 17px; }
+  .challenge-task p { margin: 0; font-size: 15px; color: var(--text); }
+  .rubric-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 15px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .rubric-table th { background: var(--orange); color: #fff; padding: 12px; text-align: left; }
+  .rubric-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+  .rubric-table tr:nth-child(even) td { background: #fffaf2; }
+
+  .summary-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 20px; }
+  .summary-title { color: var(--green); font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .keyword-tag {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 600;
+  }
+
+  .badge-section {
+    text-align: center; margin: 32px 0 16px; padding: 40px; background: linear-gradient(135deg, #e8f3fe, #d3e7fb);
+    border: 2px solid #b8d6f0; border-radius: 24px; color: #1f5f8b;
+  }
+  .badge-icon { font-size: 56px; margin-bottom: 10px; }
+  .badge-text { font-size: 26px; font-weight: 800; }
+  .badge-sub { font-size: 15px; margin-top: 6px; opacity: 0.95; }
+
+  .footer { text-align: center; font-size: 14px; color: var(--text-light); margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  code {
+    background: #f0f0f0; padding: 2px 8px; border-radius: 6px;
+    font-family: 'Consolas', 'SF Mono', monospace; font-size: 14px; color: var(--blue);
+  }
+  .section-divider { border: none; border-top: 2px dashed var(--line); margin: 36px 0; }
+
+  /* ===== Nav Bar ===== */
+  .nav-bar {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;
+    background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+    padding: 12px 16px; margin-bottom: 28px;
+  }
+  .nav-label { font-size: 14px; font-weight: 800; color: var(--text-light); margin-right: 6px; }
+  .nav-link {
+    display: inline-block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    color: var(--text); text-decoration: none; border: 2px solid var(--line); background: var(--soft);
+    transition: 0.15s;
+  }
+  .nav-link:hover { border-color: var(--blue); color: var(--blue); }
+  .nav-link.current { color: #fff; border-color: transparent; }
+  .nav-footer { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .nav-prev, .nav-next {
+    display: inline-block; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 15px;
+    text-decoration: none; color: #fff; transition: 0.15s;
+  }
+  .nav-prev { background: var(--text-light); }
+  .nav-prev:hover { opacity: 0.85; }
+  .nav-next { background: var(--green); }
+  .nav-next:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-label">📚 章節導覽</span>
+  <a class="nav-link" href="chapter1.html">01 新手村</a>
+  <a class="nav-link" href="chapter2.html">02 裝備庫</a>
+  <a class="nav-link" href="chapter3.html">03 武器庫</a>
+  <a class="nav-link" href="chapter4.html">04 冒險小隊</a>
+  <a class="nav-link current" style="background:var(--blue);" href="chapter5.html">05 高階心法</a>
+</nav>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header-card">
+  <div class="header-title">🏆 第五章：高階心法與畢業專案</div>
+  <div class="header-subtitle">最後一哩路！成為真正的「AI Agent 大師」！</div>
+  <div class="badge-bar">
+    <span class="badge">📖 14天課程・第 12-14 天</span>
+    <span class="badge">🎒 RPG 冒險教學</span>
+    <span class="badge">🎯 概念 16-23</span>
+  </div>
+</div>
+
+<!-- ===== Progress ===== -->
+<div class="progress-section">
+  <div class="progress-label">📊 課程進度</div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" style="width: 92%;">最終回！第 12 天 / 14 天</div>
+  </div>
+  <div class="progress-steps">
+    <span class="done">✅ 第一章</span>
+    <span class="done">✅ 第二章</span>
+    <span class="done">✅ 第三章</span>
+    <span class="done">✅ 第四章</span>
+    <span class="done">📖 第五章</span>
+  </div>
+</div>
+
+<!-- ===== RPG Stats ===== -->
+<div class="rpg-stat">
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">HP（生命值）</div>
+    <div class="rpg-stat-value">300</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill hp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">MP（魔法值）</div>
+    <div class="rpg-stat-value">200</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill mp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">EXP（經驗值）</div>
+    <div class="rpg-stat-value">Lv.MAX</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill sp" style="width:90%"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                        DAY 12                                 -->
+<!-- ============================================================ -->
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-title">📅 第十二天：Autonomy Spectrum + grill-me skill</div>
+    <div class="day-subtitle">今天你會學到：怎麼「馴服」AI？怎麼用提問打倒 AI 的盲點？</div>
+  </div>
+
+  <!-- ===== Concept 16 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：寵物馴服的「信任度光譜」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">16</span>
+      <span class="concept-title">Autonomy Spectrum（自主性光譜）</span>
+    </h3>
+
+    <div class="concept-text">
+      AI 不是「全自動」或「全手動」二選一。<span class="highlight">Autonomy Spectrum</span> 是一道從低到高的「信任度光譜」，你決定放手多少：
+    </div>
+
+    <!-- Goalspectrum -->
+    <div class="goalspectrum">
+      <div class="spec-row">
+        <div class="spec-level" style="background:var(--red);">完全手動</div>
+        <div class="spec-bar" style="background:linear-gradient(90deg, var(--red) 0%, var(--red) 100%);"></div>
+        <div style="font-size:14px; color:var(--text-light); min-width:160px;">每一步都需人確認</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-level" style="background:var(--orange);">半自動</div>
+        <div class="spec-bar" style="background:linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--orange) 100%);"></div>
+        <div style="font-size:14px; color:var(--text-light); min-width:160px;">AI 提案，人審核</div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-level" style="background:var(--green-dark);">全自動</div>
+        <div class="spec-bar" style="background:linear-gradient(90deg, var(--green) 0%, var(--green) 100%);"></div>
+        <div style="font-size:14px; color:var(--text-light); min-width:160px;">AI 自主完成，人監督</div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong>關鍵心法：</strong>不是讓 AI「愈自主愈好」，而是<strong>依任務風險決定自主程度</strong>：
+    </div>
+    <ul>
+      <li><span class="highlight">低風險任務</span>（整理文件、翻譯）→ 可以全自動</li>
+      <li><span class="highlight">高風險任務</span>（花錢、刪除、上網發文）→ 必須人工把關</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      就像教寵物狗：<br>
+      <strong>剛領養</strong>：出門一定要牽繩（完全手動）<br>
+      <strong>家教嚴格訓練後</strong>：在小公園可以放繩（半自動）<br>
+      <strong>非常信任後</strong>：可以完全放繩自由活動（全自動）<br><br>
+      但<strong>永遠不會</strong>讓牠獨自過馬路（高風險）！自主性要依環境與風險調整。
+    </div>
+  </div>
+
+  <!-- ===== Concept 17 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：挑戰 AI 的「壓力測試」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">17</span>
+      <span class="concept-title">grill-me skill（提問壓力測試）</span>
+    </h3>
+
+    <div class="concept-text">
+      <span class="highlight">grill-me</span>（拷問我）是一個特殊的技巧：<strong>透過一連串追問，把一個計畫的漏洞找出來</strong>。就像壓力測試你的 AI！
+    </div>
+
+    <div class="flow-diagram">
+      <div style="font-size:14px; color:var(--text-light); margin-bottom:12px;">🧪 grill-me 壓力測試流程</div>
+      <div class="flow-row">
+        <div class="flow-step" style="border-color: var(--blue);">
+          📝 提出計畫<br><span class="flow-label">「我要用 AI 創業」</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--orange);">
+          🔥 連續追問<br><span class="flow-label">「錢哪來？客戶誰？」</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--green);">
+          💡 找出漏洞<br><span class="flow-label">發現盲點</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--purple);">
+          🛠️ 修改計畫<br><span class="flow-label">更完善的方案</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong>為什麼要用 grill-me？</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">避免「我覺得可以」的盲點</span>：AI 會講得頭頭是道，其實有漏洞</li>
+      <li><span class="highlight">提前發現問題</span>：總比做出來才發現好</li>
+      <li><span class="highlight">強化邏輯</span>：逼你把每個環節都想清楚</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      想像你要蓋一座橋：<br>
+      <strong>不測試</strong>：蓋完才發現地基不穩，垮了！<br>
+      <strong>壓力測試</strong>：先在地面模擬地震、強風、超載，找出問題再動工！<br><br>
+      grill-me 就是讓你的計畫「先被狠狠拷問過」，<span class="key-point">再上戰場</span>！
+    </div>
+  </div>
+
+  <!-- ===== Day 12 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第十二天）</div>
+    <ol class="step-list">
+      <li>想一個你想用 AI 完成的小專案（例如「用 AI 規劃期末考讀書計畫」）</li>
+      <li>把計畫告訴 OpenCode，然後下令：「請用 grill-me 方式拷問這個計畫」</li>
+      <li>觀察 AI 提出哪些你沒想過的問題（預算？時間？備案？）</li>
+      <li>根據追問結果，修改你的計畫，並寫下改了哪些地方</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的 grill-me 拷問截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                        DAY 13                                 -->
+<!-- ============================================================ -->
+<div class="day-card day12">
+  <div class="day-header">
+    <div class="day-title">📅 第十三天：Goal 自動審核 LOOP</div>
+    <div class="day-subtitle">今天你要學會：怎麼讓 AI「自己盯進度、自己判斷完成」？</div>
+  </div>
+
+  <!-- ===== Concept 18 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：地城的「自動存檔點 + 自爆裝置」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">18</span>
+      <span class="concept-title">Goal-Driven Loop（目標驅動循環）</span>
+    </h3>
+
+    <div class="concept-text">
+      <span class="highlight">Goal Driven Loop</span> 是讓 AI 在「設好的目標」內自動運作，自己盯進度、自己判斷何時該停、何時該求助：
+    </div>
+
+    <div class="flow-diagram">
+      <div style="font-size:14px; color:var(--text-light); margin-bottom:12px;">🔁 Goal-Driven Loop 循環</div>
+      <div class="flow-row">
+        <div class="flow-step" style="border-color: var(--green);">
+          🎯 設目標<br><span class="flow-label">清楚定義「完成」</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--blue);">
+          🏃 執行<br><span class="flow-label">動手處理任務</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--orange);">
+          ✅ 驗收<br><span class="flow-label">檢查是否符合目標</span>
+        </div>
+        <div class="flow-arrow">↩️ 未達標就重來</div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong>Goal Loop 的三個關鍵問題（開跑前必問）：</strong>
+    </div>
+    <ol>
+      <li><strong class="key-point">做什麼？</strong> 目標要具體</li>
+      <li><strong class="key-point">用什麼做？</strong> 資源、工具要清楚</li>
+      <li><strong class="key-point">怎樣才算做完？</strong> 完成標準要「可以驗證」</li>
+    </ol>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      就像是 RPG 裡的<strong>自動導航</strong>：<br>
+      你設定目的地（目標）→ AI 自動走路、自動打怪 → 遇到無法通行的懸崖（卡關）→ 停下來問你接下來該怎麼辦<br><br>
+      <span class="key-point">Loop 的靈魂：不是傻傻跑到底，而是「自己驗收 + 卡關就求助」</span>
+    </div>
+  </div>
+
+  <!-- ===== Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第十三天）</div>
+    <ol class="step-list">
+      <li>用「Goal-Driven Loop」的方式設定一個任務，例如「在 30 分鐘內整理完這份筆記」</li>
+      <li>明確告訴 AI ：「完成標準是 → 輸出整理過的重點 3 頁 + 檢查沒有錯字」</li>
+      <li>讓 AI 執行後，<strong>用你設定的標準驗收</strong>，看它是否達標</li>
+      <li>故意設一個「不可能的目標」，觀察 AI 會不會自己停下並求助（而不是硬闖）</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的 Goal Loop 運作截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                        DAY 14 (GRADUATION)                    -->
+<!-- ============================================================ -->
+<div class="day-card day13">
+  <div class="day-header">
+    <div class="day-title">📅 第十四天：畢業專案 — 打造你的 AI Agent</div>
+    <div class="day-subtitle">把 23 個概念全部串起來，完成你的「畢業冒險」！</div>
+  </div>
+
+  <div class="concept-card" style="border-left: 5px solid var(--green);">
+    <h3 style="margin:0; color:var(--green);">🎓 畢業專案核心要求</h3>
+    <div class="concept-text" style="margin-top:10px;">
+      你要設計並實作一個<strong>真正的 AI Agent</strong>，並證明它具備 <span class="highlight">5 大能力中的至少 3 種</span>：
+    </div>
+    <div class="rpg-stat">
+      <div class="rpg-stat-item" style="border-top:5px solid var(--blue);">
+        <div style="font-size:15px; color:var(--blue); font-weight:800;">🧠 記憶</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">記住使用者與歷史</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--green);">
+        <div style="font-size:15px; color:var(--green); font-weight:800;">🛠️ 工具使用</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">用 Tool/MCP 做事</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--purple);">
+        <div style="font-size:15px; color:var(--purple); font-weight:800;">🗺️ 規劃</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">拆解任務、排定步驟</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--orange);">
+        <div style="font-size:15px; color:var(--orange); font-weight:800;">🔧 自我修正</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">出錯能自查改進</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--red);">
+        <div style="font-size:15px; color:var(--red); font-weight:800;">👤 人工監督</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">有安全護欄、會求助</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    GRADUATION CHALLENGE                       -->
+<!-- ============================================================ -->
+<div class="challenge-box">
+  <div class="challenge-title">🎓 畢業專案：打造你的 AI Agent</div>
+  <div class="challenge-subtitle">用你 14 天所學的 23 個概念，完成一個真正能解決問題的 Agent！</div>
+
+  <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:16px;">
+    <h4 style="margin:0 0 8px; color:#ff9600; font-size:17px;">🎯 挑戰目標</h4>
+    <p style="margin:0; font-size:15px; color:#3c3c3c;">
+      設計並實作一個能解決<strong>真實問題</strong>的 Agent，並證明它具備 <strong>5 大能力中的至少 3 種</strong>。<br>
+      提交：Agent 程式碼 + 500 字報告。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務一：選擇你的主題</h4>
+    <p>
+      從以下題目 (或自訂) 選擇一個：<br>
+      1. <strong>「AI 課業小幫手」</strong>：能記住學生進度、推薦練習、答題後理解錯誤<br>
+      2. <strong>「學校社團活動助理」</strong>：能查活動、登記名單、提醒時間<br>
+      3. <strong>「旅行規劃助手」</strong>：能查資料、排行程、提醒預算<br>
+      4. <strong>自訂主題</strong>：只要你覺得實用、能展示至少 3 種能力即可
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務二：展示至少 3 種能力</h4>
+    <p>
+      你的 Agent 必須明顯展現以下 <strong>5 種能力中至少 3 種</strong>，並在報告中證據十足地說明：<br>
+      ① <strong>記憶</strong>：記住使用者/歷史資料<br>
+      ② <strong>工具使用</strong>：用 Tool/MCP/ComfyUI 真的做事<br>
+      ③ <strong>規劃</strong>：把大任務拆成步驟執行<br>
+      ④ <strong>自我修正</strong>：出錯後能檢查並改進<br>
+      ⑤ <strong>人工監督</strong>：重要步驟有人工確認或安全護欄
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務三：撰寫 500 字報告</h4>
+    <p>
+      報告必須包含：<br>
+      1. <strong>專案簡介</strong>：你的 Agent 解決什麼問題？（100 字）<br>
+      2. <strong>能力展示</strong>：你選擇展示了哪 3 種能力？分別用什麼證據證明？（150 字）<br>
+      3. <strong>技術說明</strong>：用了哪些工具、MCP、ComfyUI？為什麼選這些？（100 字）<br>
+      4. <strong>安全考量</strong>：你設了什麼安全護欄？（50 字）<br>
+      5. <strong>反思與心得</strong>：你想如何改進？14 天學到什麼？（100 字）
+    </p>
+  </div>
+
+  <h4 style="color:#ff9600; margin:18px 0 8px;">📋 畢業專案評分表（總分 100）</h4>
+  <table class="rubric-table">
+    <tr>
+      <th>評分項目</th>
+      <th>分數</th>
+      <th>評分重點</th>
+    </tr>
+    <tr>
+      <td>🎯 專案完成度</td>
+      <td>35 分</td>
+      <td>Agent 真正能運作、解決問題，功能完整</td>
+    </tr>
+    <tr>
+      <td>🧠 能力展示</td>
+      <td>15 分</td>
+      <td>清楚證明至少 3 種能力（記憶/工具/規劃/自我修正/監督）</td>
+    </tr>
+    <tr>
+      <td>🛠️ 工具運用</td>
+      <td>15 分</td>
+      <td>善用 Tool/MCP/ComfyUI，選擇有理由</td>
+    </tr>
+    <tr>
+      <td>📝 報告品質</td>
+      <td>25 分</td>
+      <td>結構完整、證據清楚、有反思</td>
+    </tr>
+    <tr>
+      <td>🛡️ 安全意識</td>
+      <td>10 分</td>
+      <td>有安全護欄、人工監督觀念</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== Summary ===== -->
+<div class="summary-box">
+  <div class="summary-title">📦 第五章關鍵詞總結</div>
+  <div class="keyword-tags">
+    <span class="keyword-tag">Autonomy Spectrum</span>
+    <span class="keyword-tag">自主性光譜</span>
+    <span class="keyword-tag">grill-me</span>
+    <span class="keyword-tag">壓力測試</span>
+    <span class="keyword-tag">Goal-Driven Loop</span>
+    <span class="keyword-tag">目標驅動循環</span>
+    <span class="keyword-tag">畢業專案</span>
+    <span class="keyword-tag">五大能力</span>
+  </div>
+</div>
+
+<!-- ===== Badge (graduation) ===== -->
+<div class="badge-section">
+  <div class="badge-icon">🎓</div>
+  <div class="badge-text">恭喜你畢業了！AI Agent 大師</div>
+  <div class="badge-sub">你已掌握 23 個概念的完整體系，從「玩家」進化成「大師」！<br>現在，世界就是你的副本！</div>
+</div>
+
+<!-- ===== Full curriculum recap ===== -->
+<div class="summary-box">
+  <div class="summary-title">🗺️ 整個 14 天旅程的回顧</div>
+  <ul style="font-size:15px;">
+    <li><strong>第一章（概念 01-04）</strong>：把 AI 從「玩具」變成「工具」— 了解 AI 能為你做什麼</li>
+    <li><strong>第二章（概念 05-08）</strong>：記憶與資訊檢索 — 讓 AI 記住你、找到資料</li>
+    <li><strong>第三章（概念 09-11）</strong>：能力與外部協定 — 讓 AI 動手做事</li>
+    <li><strong>第四章（概念 12-15）</strong>：多 Agent 協作與安全 — 組隊 + 保護</li>
+    <li><strong>第五章（概念 16-23）</strong>：高階心法與畢業專案 — 成為大師</li>
+  </ul>
+  <div class="keyword-tags" style="margin-top:14px;">
+    <span class="keyword-tag">23 個概念</span>
+    <span class="keyword-tag">14 天完整旅程</span>
+    <span class="keyword-tag">5 大能力</span>
+    <span class="keyword-tag">RPG 冒險教學</span>
+    <span class="keyword-tag">🎓 畢業生</span>
+  </div>
+</div>
+
+<nav class="nav-footer">
+  <a class="nav-prev" href="chapter4.html">← 上一章：04 冒險小隊</a>
+  <span style="flex:1;"></span>
+</nav>
+
+<div class="footer">
+  🎮 AI Agent 14天課程・第五章：高階心法與畢業專案 • 恭喜完成！
+</div>
+
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent 由入門至精通 — 14 天課程</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #58cc02;
+    --green-dark: #46a302;
+    --blue: #1cb0f6;
+    --orange: #ff9600;
+    --red: #ff4b4b;
+    --purple: #ce82ff;
+    --text: #3c3c3c;
+    --text-light: #8a8a8a;
+    --bg: #fffdf8;
+    --card: #ffffff;
+    --line: #e5e5e5;
+    --soft: #f7f7f7;
+  }
+  body {
+    font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #eaf7ee 0%, var(--bg) 45%, var(--bg) 100%) fixed;
+    color: var(--text);
+    margin: 0; padding: 40px 20px; max-width: 900px;
+    margin-left: auto; margin-right: auto;
+    font-size: 16px; line-height: 1.8;
+  }
+  a { text-decoration: none; color: inherit; }
+  h1, h2, h3, h4 { line-height: 1.4; }
+
+  /* ===== Hero ===== */
+  .hero {
+    background: linear-gradient(135deg, #58cc02 0%, #46a302 50%, #1cb0f6 100%);
+    border-radius: 28px; padding: 48px 40px; text-align: center;
+    margin-bottom: 40px; color: #fff; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 200px; height: 200px; background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -40px; left: -40px;
+    width: 150px; height: 150px; background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .hero-emoji { font-size: 64px; margin-bottom: 16px; display: block; }
+  .hero-title { font-size: 36px; font-weight: 900; margin: 0 0 12px; letter-spacing: 1px; position: relative; }
+  .hero-subtitle { font-size: 18px; margin: 0; opacity: 0.95; position: relative; font-weight: 500; }
+  .hero-formula {
+    display: inline-block; margin-top: 20px; padding: 12px 28px;
+    background: rgba(255,255,255,0.2); border-radius: 999px;
+    font-size: 20px; font-weight: 800; letter-spacing: 1px;
+    backdrop-filter: blur(4px); position: relative;
+  }
+
+  /* ===== Badge Row ===== */
+  .badge-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; position: relative; }
+  .badge {
+    background: rgba(255,255,255,0.22); color: #fff;
+    padding: 6px 18px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* ===== Stats Bar ===== */
+  .stats-bar {
+    display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 36px;
+  }
+  .stat-item {
+    flex: 1 1 140px; background: var(--card); border: 2px solid var(--line);
+    border-radius: 18px; padding: 20px; text-align: center; min-width: 140px;
+    transition: border-color 0.2s;
+  }
+  .stat-item:hover { border-color: var(--green); }
+  .stat-num { font-size: 36px; font-weight: 900; color: var(--green); }
+  .stat-label { font-size: 14px; color: var(--text-light); font-weight: 700; margin-top: 4px; }
+
+  /* ===== Chapter Cards ===== */
+  .chapter-list { display: flex; flex-direction: column; gap: 20px; }
+
+  .chapter-card {
+    background: var(--card); border: 2px solid var(--line); border-radius: 20px;
+    padding: 0; overflow: hidden; transition: transform 0.15s, box-shadow 0.2s;
+    display: flex; flex-direction: column;
+  }
+  .chapter-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .chapter-top {
+    padding: 28px 28px 20px; flex: 1;
+  }
+  .chapter-top.ch1 { border-top: 6px solid var(--green); }
+  .chapter-top.ch2 { border-top: 6px solid var(--blue); }
+  .chapter-top.ch3 { border-top: 6px solid var(--orange); }
+  .chapter-top.ch4 { border-top: 6px solid var(--purple); }
+  .chapter-top.ch5 { border-top: 6px solid #1f5f8b; }
+
+  .chapter-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%; color: #fff;
+    font-size: 18px; font-weight: 900; margin-right: 14px; vertical-align: middle;
+  }
+  .ch1 .chapter-num { background: var(--green); }
+  .ch2 .chapter-num { background: var(--blue); }
+  .ch3 .chapter-num { background: var(--orange); }
+  .ch4 .chapter-num { background: var(--purple); }
+  .ch5 .chapter-num { background: #1f5f8b; }
+
+  .chapter-name { font-size: 22px; font-weight: 800; vertical-align: middle; }
+  .chapter-tagline { font-size: 15px; color: var(--text-light); margin-top: 8px; line-height: 1.6; }
+
+  .chapter-meta {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;
+  }
+  .meta-tag {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 14px; font-size: 13px; font-weight: 600; color: var(--text-light);
+  }
+
+  .chapter-bottom {
+    padding: 16px 28px; background: var(--soft); border-top: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+  .chapter-days { font-size: 14px; font-weight: 700; color: var(--text-light); }
+  .chapter-link {
+    display: inline-block; padding: 10px 24px; border-radius: 12px;
+    font-size: 15px; font-weight: 800; color: #fff; transition: opacity 0.15s;
+  }
+  .chapter-link:hover { opacity: 0.85; }
+  .ch1 .chapter-link { background: var(--green); }
+  .ch2 .chapter-link { background: var(--blue); }
+  .ch3 .chapter-link { background: var(--orange); }
+  .ch4 .chapter-link { background: var(--purple); }
+  .ch5 .chapter-link { background: #1f5f8b; }
+
+  /* ===== Formula Section ===== */
+  .formula-section {
+    background: var(--card); border: 2px solid var(--green); border-radius: 20px;
+    padding: 32px; margin: 36px 0; text-align: center;
+  }
+  .formula-title { font-size: 20px; font-weight: 800; color: var(--green); margin-bottom: 16px; }
+  .formula-flow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .formula-item {
+    background: var(--soft); border: 2px solid var(--green); border-radius: 16px;
+    padding: 18px 24px; font-size: 18px; font-weight: 800; min-width: 120px; text-align: center;
+  }
+  .formula-plus { font-size: 28px; color: var(--text-light); font-weight: 800; }
+  .formula-eq { font-size: 28px; color: var(--green); font-weight: 900; }
+  .formula-desc { font-size: 14px; color: var(--text-light); margin-top: 6px; font-weight: 400; }
+
+  /* ===== Footer ===== */
+  .footer {
+    text-align: center; margin-top: 40px; padding: 24px;
+    color: var(--text-light); font-size: 14px;
+  }
+  .footer a { color: var(--blue); font-weight: 600; }
+  .footer a:hover { text-decoration: underline; }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 600px) {
+    body { padding: 20px 12px; }
+    .hero { padding: 32px 20px; }
+    .hero-title { font-size: 26px; }
+    .hero-formula { font-size: 16px; padding: 10px 20px; }
+    .chapter-top { padding: 20px; }
+    .chapter-bottom { padding: 14px 20px; }
+    .chapter-name { font-size: 18px; }
+    .stat-num { font-size: 28px; }
+    .formula-flow { flex-direction: column; }
+    .formula-plus, .formula-eq { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== Hero ===== -->
+<div class="hero">
+  <span class="hero-emoji">🤖</span>
+  <h1 class="hero-title">AI Agent 由入門至精通</h1>
+  <p class="hero-subtitle">14 天遊戲化課程，從零打造你的第一個 AI 智能代理</p>
+  <div class="hero-formula">Agent = LLM + 上下文 + 工具</div>
+  <div class="badge-row">
+    <span class="badge">🎮 RPG 冒險風格</span>
+    <span class="badge">🎯 15 個核心概念</span>
+    <span class="badge">🛠️ 每章實戰挑戰</span>
+    <span class="badge">🎓 畢業專案</span>
+  </div>
+</div>
+
+<!-- ===== Stats ===== -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <div class="stat-num">14</div>
+    <div class="stat-label">天數</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">5</div>
+    <div class="stat-label">章節</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">15+</div>
+    <div class="stat-label">核心概念</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-num">∞</div>
+    <div class="stat-label">學習熱情</div>
+  </div>
+</div>
+
+<!-- ===== Core Formula ===== -->
+<div class="formula-section">
+  <div class="formula-title">🧠 全書核心公式</div>
+  <div class="formula-flow">
+    <div>
+      <div class="formula-item">🧠 LLM<br>大腦</div>
+      <div class="formula-desc">思考與決策</div>
+    </div>
+    <div class="formula-plus">+</div>
+    <div>
+      <div class="formula-item">👁️ 上下文<br>眼睛</div>
+      <div class="formula-desc">看到什麼資訊</div>
+    </div>
+    <div class="formula-plus">+</div>
+    <div>
+      <div class="formula-item">🦾 工具<br>手腳</div>
+      <div class="formula-desc">能做什麼事</div>
+    </div>
+    <div class="formula-eq">=</div>
+    <div>
+      <div class="formula-item" style="background:var(--green);color:#fff;border-color:var(--green);">🤖 Agent<br>智能代理</div>
+      <div class="formula-desc">自主完成任務</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Chapter List ===== -->
+<div class="chapter-list">
+
+  <!-- Chapter 1 -->
+  <div class="chapter-card">
+    <div class="chapter-top ch1">
+      <div>
+        <span class="chapter-num">1</span>
+        <span class="chapter-name">新手村 — Agent 基礎觀念</span>
+      </div>
+      <p class="chapter-tagline">搞懂「只會回話的 NPC」與「能主動解任務的玩家角色」有什麼不同！</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">🎯 Agent vs Chatbot</span>
+        <span class="meta-tag">🔄 Agentic Loop</span>
+        <span class="meta-tag">📝 System Prompt</span>
+        <span class="meta-tag">🏗️ 編排模式</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📅 第 1 ~ 2 天 ・ 概念 01-04</span>
+      <a class="chapter-link" href="chapter1.html">開始冒險 →</a>
+    </div>
+  </div>
+
+  <!-- Chapter 2 -->
+  <div class="chapter-card">
+    <div class="chapter-top ch2">
+      <div>
+        <span class="chapter-num">2</span>
+        <span class="chapter-name">裝備庫 — 記憶與資訊檢索</span>
+      </div>
+      <p class="chapter-tagline">怎麼讓 Agent 記住你？怎麼讓它不「胡說八道」？</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">⚡ 短期記憶</span>
+        <span class="meta-tag">💾 長期記憶</span>
+        <span class="meta-tag">🔍 RAG 檢索</span>
+        <span class="meta-tag">📊 向量資料庫</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📅 第 3 ~ 5 天 ・ 概念 05-08</span>
+      <a class="chapter-link" href="chapter2.html">開始冒險 →</a>
+    </div>
+  </div>
+
+  <!-- Chapter 3 -->
+  <div class="chapter-card">
+    <div class="chapter-top ch3">
+      <div>
+        <span class="chapter-num">3</span>
+        <span class="chapter-name">武器庫 — 能力與外部協定</span>
+      </div>
+      <p class="chapter-tagline">解決「光說不練」！讓你的 Agent 擁有「動手能力」！</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">⚔️ Tool Use</span>
+        <span class="meta-tag">🔌 MCP 協定</span>
+        <span class="meta-tag">🌐 API 串接</span>
+        <span class="meta-tag">🧩 組合挑戰</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📅 第 6 ~ 8 天 ・ 概念 09-11</span>
+      <a class="chapter-link" href="chapter3.html">開始冒險 →</a>
+    </div>
+  </div>
+
+  <!-- Chapter 4 -->
+  <div class="chapter-card">
+    <div class="chapter-top ch4">
+      <div>
+        <span class="chapter-num">4</span>
+        <span class="chapter-name">冒險小隊 — 多 Agent 協作與安全</span>
+      </div>
+      <p class="chapter-tagline">解決「單打獨鬥」！讓你的 Agent 學會團隊作戰 + 保護自己！</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">👥 多 Agent 架構</span>
+        <span class="meta-tag">🛡️ 安全護欄</span>
+        <span class="meta-tag">⚔️ RAID 分工</span>
+        <span class="meta-tag">🔒 風險管控</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📅 第 9 ~ 11 天 ・ 概念 12-15</span>
+      <a class="chapter-link" href="chapter4.html">開始冒險 →</a>
+    </div>
+  </div>
+
+  <!-- Chapter 5 -->
+  <div class="chapter-card">
+    <div class="chapter-top ch5">
+      <div>
+        <span class="chapter-num">5</span>
+        <span class="chapter-name">高階心法與畢業專案</span>
+      </div>
+      <p class="chapter-tagline">掌握自主性光譜、提問壓力測試，完成你的 Agent 畢業作品！</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">🎚️ Autonomy Spectrum</span>
+        <span class="meta-tag">🔍 Grill-me Skill</span>
+        <span class="meta-tag">🎓 畢業專案</span>
+        <span class="meta-tag">🏆 最終評鑑</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📅 第 12 ~ 14 天 ・ 概念 16+</span>
+      <a class="chapter-link" href="chapter5.html">開始冒險 →</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="footer">
+  <p>📖 AI Agent 由入門至精通 ・ 14 天遊戲化課程</p>
+  <p>以 RPG 冒險風格，帶你從零認識 AI Agent 的核心概念與實作</p>
+</div>
+
+</body>
+</html>

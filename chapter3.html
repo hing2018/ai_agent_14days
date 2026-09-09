@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第三章：武器庫 — 能力與外部協定</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #58cc02;
+    --green-dark: #46a302;
+    --blue: #1cb0f6;
+    --orange: #ff9600;
+    --red: #ff4b4b;
+    --purple: #ce82ff;
+    --text: #3c3c3c;
+    --text-light: #8a8a8a;
+    --bg: #fffdf8;
+    --card: #ffffff;
+    --line: #e5e5e5;
+    --soft: #f7f7f7;
+  }
+  body {
+    font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #fdf0e2 0%, var(--bg) 45%, var(--bg) 100%) fixed; color: var(--text);
+    margin: 0; padding: 40px 20px; max-width: 900px; margin-left: auto; margin-right: auto;
+    font-size: 16px; line-height: 1.8;
+  }
+  h1, h2, h3, h4 { line-height: 1.4; }
+
+  .header-card {
+    background: linear-gradient(135deg, var(--orange) 0%, #ffb24d 100%);
+    border-radius: 24px; padding: 40px 36px; text-align: center;
+    margin-bottom: 36px; color: #fff;
+  }
+  .header-title { font-size: 34px; font-weight: 800; margin: 0 0 10px; letter-spacing: 1px; }
+  .header-subtitle { font-size: 18px; margin: 0; opacity: 0.95; }
+  .badge-bar { margin-top: 16px; }
+  .badge {
+    display: inline-block; background: rgba(255,255,255,0.25); color: #fff;
+    padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin: 4px; letter-spacing: 0.5px;
+  }
+
+  .progress-section { margin-bottom: 32px; }
+  .progress-label { font-size: 14px; color: var(--text-light); margin-bottom: 8px; font-weight: 600; }
+  .progress-bar-bg { background: #ececec; border-radius: 999px; height: 26px; overflow: hidden; position: relative; }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--orange), #ffb24d);
+    display: flex; align-items: center; padding-left: 16px; font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .progress-steps { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-light); font-weight: 600; }
+  .progress-steps span.done { color: var(--green); }
+  .progress-steps span.active { color: var(--orange); }
+
+  .day-card {
+    background: var(--card); border: 2px solid var(--line); border-radius: 20px;
+    padding: 30px; margin-bottom: 32px;
+  }
+  .day-card.day6 { border-top: 6px solid var(--blue); }
+  .day-card.day7 { border-top: 6px solid var(--purple); }
+  .day-header { margin-bottom: 20px; border-bottom: 2px dashed var(--line); padding-bottom: 14px; }
+  .day-title { font-size: 24px; font-weight: 800; margin: 0; }
+  .day-subtitle { font-size: 15px; color: var(--text-light); margin-top: 4px; }
+
+  .concept-card {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .concept-num {
+    display: inline-block; background: var(--orange); color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; text-align: center;
+    line-height: 40px; font-size: 18px; font-weight: 800; margin-right: 12px; vertical-align: middle;
+  }
+  .concept-title { font-size: 21px; font-weight: 800; color: var(--text); vertical-align: middle; }
+  .metaphor-tag {
+    display: inline-block; background: #fff4e6; color: var(--orange);
+    padding: 4px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .concept-text { color: var(--text); font-size: 16px; margin: 12px 0; }
+  .highlight { color: var(--orange); font-weight: 700; }
+  .key-point { color: var(--green); font-weight: 700; }
+
+  .compare-box { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .compare-col {
+    flex: 1 1 260px; background: var(--card); border-radius: 14px; padding: 18px;
+    border: 1px solid var(--line); min-width: 240px;
+  }
+  .compare-col h4 { margin: 0 0 10px; font-size: 17px; font-weight: 800; }
+  .compare-col ul { margin: 0; padding-left: 20px; }
+  .compare-col li { font-size: 15px; margin-bottom: 6px; }
+
+  .flow-diagram {
+    background: var(--card); border-radius: 14px; padding: 24px; margin: 16px 0;
+    text-align: center; border: 1px solid var(--line);
+  }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--soft); border: 2px solid var(--orange); border-radius: 14px;
+    padding: 14px 18px; font-size: 16px; font-weight: 800; color: var(--text);
+    min-width: 110px; text-align: center;
+  }
+  .flow-arrow { font-size: 22px; color: var(--text-light); margin: 0 4px; flex-shrink: 0; }
+  .flow-label { font-size: 13px; color: var(--text-light); display: block; margin-top: 4px; font-weight: 400; }
+
+  .mcp-diagram {
+    background: var(--card); border-radius: 16px; padding: 30px; margin: 16px 0;
+    text-align: center; border: 2px solid var(--blue);
+  }
+  .mcp-title { font-size: 17px; font-weight: 800; color: var(--blue); margin-bottom: 20px; }
+  .mcp-row { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .mcp-node {
+    border-radius: 14px; padding: 16px 20px; font-weight: 800; font-size: 15px; color: #fff;
+    min-width: 120px;
+  }
+  .mcp-node.user { background: var(--green); }
+  .mcp-node.agent { background: var(--blue); }
+  .mcp-node.mcp { background: var(--purple); }
+  .mcp-node.app { background: var(--orange); }
+  .mcp-line { width: 40px; height: 3px; background: var(--line); border-radius: 999px; }
+  .mcp-caption { font-size: 13px; color: var(--text-light); margin-top: 14px; }
+
+  .rpg-stat { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .rpg-stat-item {
+    flex: 1 1 200px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; text-align: center; min-width: 180px;
+  }
+  .rpg-stat-label { font-size: 14px; color: var(--text-light); font-weight: 700; letter-spacing: 0.5px; }
+  .rpg-stat-value { font-size: 22px; font-weight: 800; color: var(--orange); margin: 6px 0; }
+  .rpg-stat-bar { height: 10px; background: #ececec; border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .rpg-stat-bar-fill { height: 100%; border-radius: 999px; }
+  .rpg-stat-bar-fill.hp { background: var(--red); }
+  .rpg-stat-bar-fill.mp { background: var(--purple); }
+  .rpg-stat-bar-fill.sp { background: var(--green); }
+
+  .example-box {
+    background: #fff8e8; border-left: 5px solid var(--orange);
+    padding: 14px 16px; font-size: 15px; border-radius: 0 12px 12px 0; margin-top: 10px;
+  }
+  .example-title { color: var(--orange); font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+
+  .practice-box {
+    background: #eafaf0; border: 2px solid var(--green); border-radius: 16px; padding: 24px; margin: 18px 0;
+  }
+  .practice-title { color: var(--green); font-size: 20px; font-weight: 800; margin: 0 0 14px; }
+  .practice-box p { color: var(--text); }
+  .step-list { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    counter-increment: step; padding: 12px 14px 12px 64px; margin-bottom: 8px;
+    background: var(--card); border-radius: 12px; font-size: 15px; position: relative;
+  }
+  .step-list li::before {
+    content: "Step " counter(step); position: absolute; left: 12px; top: 12px;
+    background: var(--green); color: #fff; font-size: 12px; font-weight: 800;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .screenshot-frame {
+    background: #fff; border: 2px dashed #d0d0d0; border-radius: 14px;
+    min-height: 130px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-light); font-size: 15px; margin: 12px 0;
+  }
+
+  .terminal {
+    background: #2d2d2d; border-radius: 12px; padding: 18px; margin: 14px 0;
+    font-family: 'Consolas', 'SF Mono', monospace; font-size: 14px; color: #e8e8e8;
+    overflow-x: auto; position: relative;
+  }
+  .terminal-bar { display:flex; align-items:center; gap:6px; margin-bottom:14px; }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .terminal-dot.red { background: #ff5f56; }
+  .terminal-dot.yellow { background: #ffbd2e; }
+  .terminal-dot.green { background: #27c93f; }
+  .terminal-cmd { color: #7ee787; }
+  .terminal-out { color: #d0d7de; }
+  .terminal-in { color: #ffab70; }
+
+  .drawing-preview {
+    background: linear-gradient(135deg, #fff0e6, #ffe9f0);
+    border: 2px dashed var(--orange); border-radius: 16px;
+    padding: 40px; margin: 16px 0; text-align: center;
+    color: var(--orange); font-size: 16px; font-weight: 700;
+  }
+
+  .challenge-box {
+    background: #fff7ea; border: 3px solid var(--orange); border-radius: 20px;
+    padding: 28px; margin: 24px 0;
+  }
+  .challenge-title { color: var(--orange); font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+  .challenge-subtitle { color: var(--text-light); font-size: 16px; margin-bottom: 16px; }
+  .challenge-task {
+    background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    border-left: 5px solid var(--orange);
+  }
+  .challenge-task h4 { margin: 0 0 6px; color: var(--orange); font-size: 17px; }
+  .challenge-task p { margin: 0; font-size: 15px; color: var(--text); }
+  .rubric-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 15px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .rubric-table th { background: var(--orange); color: #fff; padding: 12px; text-align: left; }
+  .rubric-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+  .rubric-table tr:nth-child(even) td { background: #fffaf2; }
+
+  .summary-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 20px; }
+  .summary-title { color: var(--green); font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .keyword-tag {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 600;
+  }
+  .tomorrow-box {
+    background: #f6ecff; border-left: 5px solid var(--purple);
+    padding: 14px 16px; border-radius: 0 12px 12px 0; margin-top: 16px; font-size: 15px;
+  }
+  .tomorrow-label { color: var(--purple); font-weight: 800; font-size: 15px; }
+
+  .badge-section {
+    text-align: center; margin: 32px 0 16px; padding: 32px; background: linear-gradient(135deg, var(--orange), #ffb24d);
+    border-radius: 20px; color: #fff;
+  }
+  .badge-icon { font-size: 48px; margin-bottom: 10px; }
+  .badge-text { font-size: 22px; font-weight: 800; }
+  .badge-sub { font-size: 15px; margin-top: 6px; opacity: 0.95; }
+
+  .footer { text-align: center; font-size: 14px; color: var(--text-light); margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  code {
+    background: #f0f0f0; padding: 2px 8px; border-radius: 6px;
+    font-family: 'Consolas', 'SF Mono', monospace; font-size: 14px; color: var(--blue);
+  }
+  .section-divider { border: none; border-top: 2px dashed var(--line); margin: 36px 0; }
+
+  /* ===== Nav Bar ===== */
+  .nav-bar {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;
+    background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+    padding: 12px 16px; margin-bottom: 28px;
+  }
+  .nav-label { font-size: 14px; font-weight: 800; color: var(--text-light); margin-right: 6px; }
+  .nav-link {
+    display: inline-block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    color: var(--text); text-decoration: none; border: 2px solid var(--line); background: var(--soft);
+    transition: 0.15s;
+  }
+  .nav-link:hover { border-color: var(--blue); color: var(--blue); }
+  .nav-link.current { color: #fff; border-color: transparent; }
+  .nav-footer { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .nav-prev, .nav-next {
+    display: inline-block; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 15px;
+    text-decoration: none; color: #fff; transition: 0.15s;
+  }
+  .nav-prev { background: var(--text-light); }
+  .nav-prev:hover { opacity: 0.85; }
+  .nav-next { background: var(--green); }
+  .nav-next:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-label">📚 章節導覽</span>
+  <a class="nav-link" href="chapter1.html">01 新手村</a>
+  <a class="nav-link" href="chapter2.html">02 裝備庫</a>
+  <a class="nav-link current" style="background:var(--orange);" href="chapter3.html">03 武器庫</a>
+  <a class="nav-link" href="chapter4.html">04 冒險小隊</a>
+  <a class="nav-link" href="chapter5.html">05 高階心法</a>
+</nav>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header-card">
+  <div class="header-title">⚔️ 第三章：武器庫 — 能力與外部協定</div>
+  <div class="header-subtitle">解決「光說不練」！讓你的 Agent 擁有「動手能力」！</div>
+  <div class="badge-bar">
+    <span class="badge">📖 14天課程・第 6-8 天</span>
+    <span class="badge">🎒 RPG 冒險教學</span>
+    <span class="badge">🎯 概念 09-11</span>
+  </div>
+</div>
+
+<!-- ===== Progress ===== -->
+<div class="progress-section">
+  <div class="progress-label">📊 課程進度</div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" style="width: 42%;">第 6 天 / 14 天</div>
+  </div>
+  <div class="progress-steps">
+    <span class="done">✅ 第一章</span>
+    <span class="done">✅ 第二章</span>
+    <span class="active">📖 第三章</span>
+    <span>⬜ 第四章</span>
+    <span>⬜ 第五章</span>
+  </div>
+</div>
+
+<!-- ===== RPG Stats ===== -->
+<div class="rpg-stat">
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">HP（生命值）</div>
+    <div class="rpg-stat-value">100</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill hp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">MP（魔法值）</div>
+    <div class="rpg-stat-value">100</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill mp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">EXP（經驗值）</div>
+    <div class="rpg-stat-value">Lv.3</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill sp" style="width:30%"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                        DAY 6                                  -->
+<!-- ============================================================ -->
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-title">📅 第六天：Tool Use + MCP</div>
+    <div class="day-subtitle">今天你會學到：怎麼讓 Agent 不只會說，還「真的能做」？</div>
+  </div>
+
+  <!-- ===== Concept 09 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：給主角配備「武器」和「技能」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">09</span>
+      <span class="concept-title">Tool Use（工具使用）</span>
+    </h3>
+
+    <div class="concept-text">
+      Agent 天生只有「動動嘴巴」（生成文字）。但是只要交給它 <span class="highlight">Tools（工具）</span>，它就能動手做事：
+    </div>
+
+    <div class="compare-box">
+      <div class="compare-col" style="border-top: 5px solid var(--red);">
+        <h4 style="color: var(--red);">🧠 只有大腦（沒有武器）</h4>
+        <ul>
+          <li>只能「紙上談兵」</li>
+          <li>回答「怎麼游泳」但不會游泳</li>
+          <li>無法播放音樂、無法畫圖</li>
+          <li>無法操作任何軟體</li>
+        </ul>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--green);">
+        <h4 style="color: var(--green);">⚔️ 大腦 + 武器（Tool Use）</h4>
+        <ul>
+          <li>能「理論 + 實作」</li>
+          <li>會算數學（計算機）</li>
+          <li>上網找資料（瀏覽器）</li>
+          <li>畫圖（ComfyUI）</li>
+          <li>操作任何 App（MCP）</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">💡 生活中的例子：</div>
+      想像一位「美食評論家」：<br>
+      <strong>沒有工具：</strong>只能評論「這道菜看起來很好吃」<br>
+      <strong>有工具：</strong>可以真的打開冰箱（工具）、拿食材（工具）、下廚煮飯（工具）、最後端出成品！
+    </div>
+  </div>
+
+  <!-- ===== Concept 10 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：巨型 Roblox 萬用遊樂場</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">10</span>
+      <span class="concept-title">MCP（模型上下文協定）</span>
+    </h3>
+
+    <div class="concept-text">
+      MCP（Model Context Protocol）是 <span class="highlight">AI 世界的「USB 插槽」</span>。不同軟體（Notion、瀏覽器、繪圖、學校系統）只要符合 MCP 標準，Agent 就能「即插即用」！
+    </div>
+
+    <!-- MCP Diagram -->
+    <div class="mcp-diagram">
+      <div class="mcp-title">🔌 MCP 架構圖：AI 的「萬能插槽」</div>
+      <div class="mcp-row">
+        <div class="mcp-node user">👤 使用者<br><span style="font-weight:400;font-size:12px;">你</span></div>
+        <div class="mcp-line"></div>
+        <div class="mcp-node agent">🤖 Agent<br><span style="font-weight:400;font-size:12px;">AI 助手</span></div>
+        <div class="mcp-line"></div>
+        <div class="mcp-node mcp">🔌 MCP 插槽<br><span style="font-weight:400;font-size:12px;">標準協定</span></div>
+      </div>
+      <div style="display:flex; justify-content:center; gap:10px; margin-top:16px; flex-wrap:wrap;">
+        <div class="mcp-node user" style="background:var(--blue);">📝 Notion MCP<br><span style="font-weight:400;font-size:12px;">筆記軟體</span></div>
+        <div class="mcp-node user" style="background:var(--purple);">🎨 ComfyUI MCP<br><span style="font-weight:400;font-size:12px;">繪圖</span></div>
+        <div class="mcp-node user" style="background:var(--orange);">🌐 瀏覽器 MCP<br><span style="font-weight:400;font-size:12px;">上網</span></div>
+      </div>
+      <div class="mcp-caption">「插上哪個工具，Agent 就能用哪個 App！」</div>
+    </div>
+
+    <div class="concept-text">
+      <strong>MCP 的三個角色：</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">Agent（主機）</span>：發出指令的 AI 大腦</li>
+      <li><span class="highlight">MCP Server（伺服器）</span>：轉換語言的「翻譯官」</li>
+      <li><span class="highlight">App（工具）</span>：被操作的軟體（Notion、ComfyUI）</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      想像一個 <strong>Roblox 遊樂場</strong>：<br>
+      <strong>遊戲廳的電源插座</strong>（MCP）是統一的標準規格，無論是遊戲機、點唱機、零食機，插上去就能用。<br>
+      只要符合「插座標準」（MCP 協定），<strong>任何新設備</strong>（新 App）都能直接插入使用，不用重新佈線！<br><br>
+      <strong class="key-point">MCP 讓 Agent「什麼都能做」！</strong>
+    </div>
+  </div>
+
+  <!-- ===== Day 6 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第六天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode GUI 中，輸入「幫我開一個新 Notion 頁面，標題是『我的 AI 課程筆記』」—— 觀察 Agent 使用 Notion MCP 工具</li>
+      <li>對 Agent 說「把剛剛那頁的標題改成『我的學習筆記』」—— 觀察它使用「編輯/更新」工具</li>
+      <li>對 Agent 說「列出我 Notion 上所有的頁面」—— 觀察它用「搜尋/列出」工具</li>
+      <li>寫下：MCP 和一般的 API 訂閱有什麼不同？（提示：API 是客製化，MCP 是標準化）</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的 Notion 操作截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                        DAY 7                                  -->
+<!-- ============================================================ -->
+<div class="day-card day6">
+  <div class="day-header">
+    <div class="day-title">📅 第七天：ComfyUI 本地生成圖片</div>
+    <div class="day-subtitle">今天你變成魔法師：用文字召喚圖片！</div>
+  </div>
+
+  <!-- ===== Concept 11 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：煉金術士的「文字召喚陣」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">11</span>
+      <span class="concept-title">圖片生成 & ComfyUI</span>
+    </h3>
+
+    <div class="concept-text">
+      透過 <span class="highlight">ComfyUI</span>，你只要輸入文字描述（Prompt），就能生成圖片。就像跟一位 <strong class="key-point">畫家下訂單</strong>：
+    </div>
+
+    <div class="flow-diagram">
+      <div style="font-size:14px; color:var(--text-light); margin-bottom:12px;">🎨 文字召喚圖片流程</div>
+      <div class="flow-row">
+        <div class="flow-step" style="border-color: var(--green);">
+          📝 輸入文字<br><span class="flow-label">「藍色的小機器人」</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--blue);">
+          🧠 理解文字<br><span class="flow-label">ComfyUI 解析</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--purple);">
+          🎨 生成像素<br><span class="flow-label">擴散模型</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--orange);">
+          🖼️ 輸出圖片<br><span class="flow-label">完成！</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawing-preview">
+      🌌 想像這裡有一張「夢幻星空小狐狸」的圖片<br>
+      <span style="font-size:14px; font-weight:400;">（這是由 AI 用文字生成的！）</span>
+    </div>
+
+    <div class="concept-text">
+      <strong>用 ComfyUI 生成圖片的三大要素：</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">Prompt（提示詞）</span>：描述你想要的圖，越詳細越好</li>
+      <li><span class="highlight">Negative Prompt（負面提示詞）</span>：告訴 AI「不要」畫什麼</li>
+      <li><span class="highlight">Seed（種子）</span>：固定的亂數種子，能重現同一張圖</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      你要找一位設計師畫一張貼圖：<br>
+      <strong>模糊的描述：</strong>「畫一隻貓」→ 你可能得到任何東西<br>
+      <strong>清楚的描述：</strong>「畫一隻橘色的、戴著藍色眼鏡、坐在星空下的貓，請用動畫風格」→ 得到你想要的圖！<br><br>
+      Prompt 寫得越清楚，AI 畫得越符合期待。<span class="key-point">就像「命令越明確，士兵越不會搞錯任務」！</span>
+    </div>
+  </div>
+
+  <!-- ===== Day 7 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第七天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode GUI 中開啟 ComfyUI 工作區</li>
+      <li>在輸入框輸入「一隻身穿太空裝的橘貓在月球上，動畫風格，色彩繽紛」並執行</li>
+      <li>換一個 prompt「同一隻貓但改成藍色眼鏡」，比較差異</li>
+      <li>加入 Negative Prompt「模糊、低畫質、多餘的手」再生成一次</li>
+      <li>使用同樣的 seed 再生成一次，觀察是否得到相同結果</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的生成圖片截圖（至少 3 張）</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    DAY 8: CHALLENGE + COMBO                   -->
+<!-- ============================================================ -->
+<div class="day-card day7">
+  <div class="day-header">
+    <div class="day-title">📅 第八天：組合挑戰 — 一鍵生成你的專屬貼圖</div>
+    <div class="day-subtitle">串聯 Tool Use + MCP + ComfyUI，讓你體驗「一鍵完成」的魔法！</div>
+  </div>
+
+  <div class="concept-card" style="border-left: 5px solid var(--purple);">
+    <h3 style="margin:0; color:var(--purple);">🧩 什麼是「組合挑戰」？</h3>
+    <div class="concept-text" style="margin-top:10px;">
+      到目前為止，你學了：<br>
+      1. <strong class="key-point">Tool Use</strong>：讓 Agent 有工具可用<br>
+      2. <strong class="key-point">MCP</strong>：讓 Agent 能連通各軟體<br>
+      3. <strong class="key-point">ComfyUI</strong>：讓 Agent 能生成圖片<br><br>
+      現在，我們要把它們 <span class="highlight">串聯起來</span>！打造一個「自動貼圖工廠」！
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    CHAPTER 3 CHALLENGE                        -->
+<!-- ============================================================ -->
+<div class="challenge-box">
+  <div class="challenge-title">⚔️ 第三章小挑戰：一鍵生成專屬貼圖</div>
+  <div class="challenge-subtitle">結合 Tool Use、MCP、ComfyUI，打造你的「自動貼圖工廠」！</div>
+
+  <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:16px;">
+    <h4 style="margin:0 0 8px; color:#ff9600; font-size:17px;">🎯 挑戰目標</h4>
+    <p style="margin:0; font-size:15px; color:#3c3c3c;">
+      用 <strong>OpenCode GUI</strong> 打造一個「自動貼圖工廠」，能將文字描述轉換成超可愛的星球貼圖，並自動存到 Notion。串聯工具使用（Tool Use）、外部協定（MCP）、圖片生成（ComfyUI）三大能力。<br>
+      提交流程截圖 + 生成圖片 + 300 字報告。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務一：生成專屬星球貼圖</h4>
+    <p>
+      在 ComfyUI 利用文字生成 3 張不同主題的星球貼圖：<br>
+      1. 「可愛的粉色星球，戴著小皇冠，微笑表情，柔軟的卡通風格」<br>
+      2. 「湛藍色海洋星球，戴著太陽眼鏡，放鬆的度假心情，動畫風格」<br>
+      3. 「彩虹色星球，戴著廚師帽，開心烘焙中，繽紛卡通風格」
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務二：串聯 MCP 建立貼圖目錄</h4>
+    <p>
+      在 Notion 建立一個「我的星球貼圖」資料庫頁面，包含這 3 張圖的：<br>
+      1. 名稱<br>
+      2. 主題描述<br>
+      3. 生成的 Prompt（提示詞）<br>
+      4. 圖片
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務三：一鍵產生新貼圖</h4>
+    <p>
+      用一句話讓 Agent 自動完成整個流程：<br>
+      <code>「我現在想要一張『森林綠色星球，戴著狐狸耳朵，害羞的表情』的貼圖，請幫我生成並存入貼圖目錄」</code><br>
+      觀察 Agent 是否自動依序完成：ComfyUI 生成 → 存檔 → Notion 更新
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務四：撰寫 300 字報告</h4>
+    <p>
+      寫下：<br>
+      1. Tool Use、MCP、ComfyUI 在本挑戰中各自扮演什麼角色？（3-4 句）<br>
+      2. 如果沒有 MCP，你怎麼把圖片存到 Notion？（2-3 句）<br>
+      3. Prompt 寫得好不好，對生成結果影響有多大？舉例說明（3 句）<br>
+      4. 你未來還想讓 Agent 自動做什麼？（2-3 句）
+    </p>
+  </div>
+
+  <h4 style="color:#ff9600; margin:18px 0 8px;">📋 評分標準</h4>
+  <table class="rubric-table">
+    <tr>
+      <th>評分項目</th>
+      <th>分數</th>
+      <th>說明</th>
+    </tr>
+    <tr>
+      <td>✅ 星球貼圖生成</td>
+      <td>25 分</td>
+      <td>成功用 ComfyUI 生成 3 張主題貼圖</td>
+    </tr>
+    <tr>
+      <td>✅ 貼圖目錄建立</td>
+      <td>25 分</td>
+      <td>在 Notion 建立含 4 欄位的貼圖目錄</td>
+    </tr>
+    <tr>
+      <td>✅ 一鍵生成整合</td>
+      <td>25 分</td>
+      <td>一句話觸發完整流程：生成 → 存檔 → 更新目錄</td>
+    </tr>
+    <tr>
+      <td>✅ 300 字報告</td>
+      <td>25 分</td>
+      <td>能清楚說明三工具角色的差異，報告具反思</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== Summary ===== -->
+<div class="summary-box">
+  <div class="summary-title">📦 第三章關鍵詞總結</div>
+  <div class="keyword-tags">
+    <span class="keyword-tag">Tool Use</span>
+    <span class="keyword-tag">Tools</span>
+    <span class="keyword-tag">MCP</span>
+    <span class="keyword-tag">MCP Server</span>
+    <span class="keyword-tag">ComfyUI</span>
+    <span class="keyword-tag">Prompt</span>
+    <span class="keyword-tag">Seed</span>
+    <span class="keyword-tag">貼圖工廠</span>
+  </div>
+
+  <div class="tomorrow-box">
+    <div class="tomorrow-label">🔮 明天預告：第四章 — 冒險小隊（多 Agent 協作與安全）</div>
+    我們會學習 Multi-Agent、Delegation（授權）、安全防護！<br>
+    準備好讓你的 Agent「分身術」和「團隊作戰」了嗎？
+  </div>
+</div>
+
+<!-- ===== Badge ===== -->
+<div class="badge-section">
+  <div class="badge-icon">⚔️</div>
+  <div class="badge-text">第三章通關徽章：武器庫大師</div>
+  <div class="badge-sub">你已掌握讓 Agent「動手做事」的三大神器！</div>
+</div>
+
+<nav class="nav-footer">
+  <a class="nav-prev" href="chapter2.html">← 上一章：02 裝備庫</a>
+  <a class="nav-next" href="chapter4.html">下一章：04 冒險小隊 →</a>
+</nav>
+
+<div class="footer">
+  🎮 AI Agent 14天課程・第三章：武器庫 • 能力與外部協定
+</div>
+
+</body>
+</html>
