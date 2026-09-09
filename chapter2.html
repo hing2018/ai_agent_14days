@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第二章：裝備庫 — 記憶與資訊檢索</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #58cc02;
+    --green-dark: #46a302;
+    --blue: #1cb0f6;
+    --orange: #ff9600;
+    --red: #ff4b4b;
+    --purple: #ce82ff;
+    --text: #3c3c3c;
+    --text-light: #8a8a8a;
+    --bg: #fffdf8;
+    --card: #ffffff;
+    --line: #e5e5e5;
+    --soft: #f7f7f7;
+  }
+  body {
+    font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #ede8fb 0%, var(--bg) 45%, var(--bg) 100%) fixed; color: var(--text);
+    margin: 0; padding: 40px 20px; max-width: 900px; margin-left: auto; margin-right: auto;
+    font-size: 16px; line-height: 1.8;
+  }
+  h1, h2, h3, h4 { line-height: 1.4; }
+
+  .header-card {
+    background: linear-gradient(135deg, var(--blue) 0%, #58c9f7 100%);
+    border-radius: 24px; padding: 40px 36px; text-align: center;
+    margin-bottom: 36px; color: #fff;
+  }
+  .header-title { font-size: 34px; font-weight: 800; margin: 0 0 10px; letter-spacing: 1px; }
+  .header-subtitle { font-size: 18px; margin: 0; opacity: 0.95; }
+  .badge-bar { margin-top: 16px; }
+  .badge {
+    display: inline-block; background: rgba(255,255,255,0.25); color: #fff;
+    padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin: 4px; letter-spacing: 0.5px;
+  }
+
+  .progress-section { margin-bottom: 32px; }
+  .progress-label { font-size: 14px; color: var(--text-light); margin-bottom: 8px; font-weight: 600; }
+  .progress-bar-bg { background: #ececec; border-radius: 999px; height: 26px; overflow: hidden; position: relative; }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), #58c9f7);
+    display: flex; align-items: center; padding-left: 16px; font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .progress-steps { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-light); font-weight: 600; }
+  .progress-steps span.done { color: var(--green); }
+  .progress-steps span.active { color: var(--blue); }
+
+  .day-card {
+    background: var(--card); border: 2px solid var(--line); border-radius: 20px;
+    padding: 30px; margin-bottom: 32px;
+  }
+  .day-card.day2 { border-top: 6px solid var(--purple); }
+  .day-card.day3 { border-top: 6px solid var(--orange); }
+  .day-header { margin-bottom: 20px; border-bottom: 2px dashed var(--line); padding-bottom: 14px; }
+  .day-title { font-size: 24px; font-weight: 800; margin: 0; }
+  .day-subtitle { font-size: 15px; color: var(--text-light); margin-top: 4px; }
+
+  .concept-card {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .concept-num {
+    display: inline-block; background: var(--blue); color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; text-align: center;
+    line-height: 40px; font-size: 18px; font-weight: 800; margin-right: 12px; vertical-align: middle;
+  }
+  .concept-title { font-size: 21px; font-weight: 800; color: var(--text); vertical-align: middle; }
+  .metaphor-tag {
+    display: inline-block; background: #e6f6ff; color: var(--blue);
+    padding: 4px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .concept-text { color: var(--text); font-size: 16px; margin: 12px 0; }
+  .highlight { color: var(--blue); font-weight: 700; }
+  .key-point { color: var(--orange); font-weight: 700; }
+
+  .compare-box { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .compare-col {
+    flex: 1 1 260px; background: var(--card); border-radius: 14px; padding: 18px;
+    border: 1px solid var(--line); min-width: 240px;
+  }
+  .compare-col h4 { margin: 0 0 10px; font-size: 17px; font-weight: 800; }
+  .compare-col ul { margin: 0; padding-left: 20px; }
+  .compare-col li { font-size: 15px; margin-bottom: 6px; }
+
+  .flow-diagram {
+    background: var(--card); border-radius: 14px; padding: 24px; margin: 16px 0;
+    text-align: center; border: 1px solid var(--line);
+  }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--soft); border: 2px solid var(--blue); border-radius: 14px;
+    padding: 14px 18px; font-size: 16px; font-weight: 800; color: var(--text);
+    min-width: 110px; text-align: center;
+  }
+  .flow-arrow { font-size: 22px; color: var(--text-light); margin: 0 4px; flex-shrink: 0; }
+  .flow-label { font-size: 13px; color: var(--text-light); display: block; margin-top: 4px; font-weight: 400; }
+
+  .rpg-stat { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .rpg-stat-item {
+    flex: 1 1 200px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; text-align: center; min-width: 180px;
+  }
+  .rpg-stat-label { font-size: 14px; color: var(--text-light); font-weight: 700; letter-spacing: 0.5px; }
+  .rpg-stat-value { font-size: 22px; font-weight: 800; color: var(--orange); margin: 6px 0; }
+  .rpg-stat-bar { height: 10px; background: #ececec; border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .rpg-stat-bar-fill { height: 100%; border-radius: 999px; }
+  .rpg-stat-bar-fill.hp { background: var(--red); }
+  .rpg-stat-bar-fill.mp { background: var(--purple); }
+  .rpg-stat-bar-fill.sp { background: var(--green); }
+  .rpg-stat-bar-fill.short { background: var(--red); }
+  .rpg-stat-bar-fill.long { background: var(--green); }
+
+  .example-box {
+    background: #fff8e8; border-left: 5px solid var(--orange);
+    padding: 14px 16px; font-size: 15px; border-radius: 0 12px 12px 0; margin-top: 10px;
+  }
+  .example-title { color: var(--orange); font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+
+  .practice-box {
+    background: #eafaf0; border: 2px solid var(--green); border-radius: 16px; padding: 24px; margin: 18px 0;
+  }
+  .practice-title { color: var(--green); font-size: 20px; font-weight: 800; margin: 0 0 14px; }
+  .practice-box p { color: var(--text); }
+  .step-list { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    counter-increment: step; padding: 12px 14px 12px 64px; margin-bottom: 8px;
+    background: var(--card); border-radius: 12px; font-size: 15px; position: relative;
+  }
+  .step-list li::before {
+    content: "Step " counter(step); position: absolute; left: 12px; top: 12px;
+    background: var(--green); color: #fff; font-size: 12px; font-weight: 800;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .screenshot-frame {
+    background: #fff; border: 2px dashed #d0d0d0; border-radius: 14px;
+    min-height: 130px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-light); font-size: 15px; margin: 12px 0;
+  }
+
+  .challenge-box {
+    background: #fff7ea; border: 3px solid var(--orange); border-radius: 20px;
+    padding: 28px; margin: 24px 0;
+  }
+  .challenge-title { color: var(--orange); font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+  .challenge-subtitle { color: var(--text-light); font-size: 16px; margin-bottom: 16px; }
+  .challenge-task {
+    background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    border-left: 5px solid var(--orange);
+  }
+  .challenge-task h4 { margin: 0 0 6px; color: var(--orange); font-size: 17px; }
+  .challenge-task p { margin: 0; font-size: 15px; color: var(--text); }
+  .rubric-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 15px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .rubric-table th { background: var(--orange); color: #fff; padding: 12px; text-align: left; }
+  .rubric-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+  .rubric-table tr:nth-child(even) td { background: #fffaf2; }
+
+  .summary-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 20px; }
+  .summary-title { color: var(--green); font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .keyword-tag {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 600;
+  }
+  .tomorrow-box {
+    background: #f6ecff; border-left: 5px solid var(--purple);
+    padding: 14px 16px; border-radius: 0 12px 12px 0; margin-top: 16px; font-size: 15px;
+  }
+  .tomorrow-label { color: var(--purple); font-weight: 800; font-size: 15px; }
+
+  .badge-section {
+    text-align: center; margin: 32px 0 16px; padding: 32px; background: linear-gradient(135deg, var(--blue), #58c9f7);
+    border-radius: 20px; color: #fff;
+  }
+  .badge-icon { font-size: 48px; margin-bottom: 10px; }
+  .badge-text { font-size: 22px; font-weight: 800; }
+  .badge-sub { font-size: 15px; margin-top: 6px; opacity: 0.95; }
+
+  .footer { text-align: center; font-size: 14px; color: var(--text-light); margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  code {
+    background: #f0f0f0; padding: 2px 8px; border-radius: 6px;
+    font-family: 'Consolas', 'SF Mono', monospace; font-size: 14px; color: var(--blue);
+  }
+  .section-divider { border: none; border-top: 2px dashed var(--line); margin: 36px 0; }
+
+  .vector-visual {
+    display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap;
+    margin: 16px 0; padding: 24px; background: var(--card); border-radius: 14px; border: 1px solid var(--line);
+  }
+  .vector-word {
+    padding: 10px 16px; border-radius: 10px; font-size: 16px; font-weight: 800;
+    border: 2px solid;
+  }
+  .vector-near { border-color: var(--green); color: var(--green-dark); background: #eafaf0; }
+  /* ===== Nav Bar ===== */
+  .nav-bar {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;
+    background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+    padding: 12px 16px; margin-bottom: 28px;
+  }
+  .nav-label { font-size: 14px; font-weight: 800; color: var(--text-light); margin-right: 6px; }
+  .nav-link {
+    display: inline-block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    color: var(--text); text-decoration: none; border: 2px solid var(--line); background: var(--soft);
+    transition: 0.15s;
+  }
+  .nav-link:hover { border-color: var(--blue); color: var(--blue); }
+  .nav-link.current { color: #fff; border-color: transparent; }
+  .nav-footer { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .nav-prev, .nav-next {
+    display: inline-block; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 15px;
+    text-decoration: none; color: #fff; transition: 0.15s;
+  }
+  .nav-prev { background: var(--text-light); }
+  .nav-prev:hover { opacity: 0.85; }
+  .nav-next { background: var(--green); }
+  .nav-next:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-label">📚 章節導覽</span>
+  <a class="nav-link" href="chapter1.html">01 新手村</a>
+  <a class="nav-link current" style="background:var(--purple);" href="chapter2.html">02 裝備庫</a>
+  <a class="nav-link" href="chapter3.html">03 武器庫</a>
+  <a class="nav-link" href="chapter4.html">04 冒險小隊</a>
+  <a class="nav-link" href="chapter5.html">05 高階心法</a>
+</nav>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header-card">
+  <div class="header-title">🎒 第二章：裝備庫 — 記憶與資訊檢索</div>
+  <div class="header-subtitle">解決「金魚腦」問題！讓你的 Agent 隨時調閱萬卷攻略書！</div>
+  <div class="badge-bar">
+    <span class="badge">📖 14天課程・第 3-5 天</span>
+    <span class="badge">🎒 RPG 冒險教學</span>
+    <span class="badge">🎯 概念 05-08</span>
+  </div>
+</div>
+
+<!-- ===== Progress ===== -->
+<div class="progress-section">
+  <div class="progress-label">📊 課程進度</div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" style="width: 28%;">第 3 天 / 14 天</div>
+  </div>
+  <div class="progress-steps">
+    <span class="done">✅ 第一章</span>
+    <span class="active">📖 第二章</span>
+    <span>⬜ 第三章</span>
+    <span>⬜ 第四章</span>
+    <span>⬜ 第五章</span>
+  </div>
+</div>
+
+<!-- ===== RPG Stats ===== -->
+<div class="rpg-stat">
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">HP（生命值）</div>
+    <div class="rpg-stat-value">100</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill short" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">MP（魔法值）</div>
+    <div class="rpg-stat-value">50</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill long" style="width:50%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">EXP（經驗值）</div>
+    <div class="rpg-stat-value">Lv.2</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill long" style="width:20%"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                        DAY 3                                  -->
+<!-- ============================================================ -->
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-title">📅 第三天：短期記憶 vs 長期記憶 + RAG</div>
+    <div class="day-subtitle">今天你會學到：怎麼讓 Agent 記住你？怎麼讓它不「胡說八道」？</div>
+  </div>
+
+  <!-- ===== Concept 05 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：戰鬥面板快捷列 vs 雲端遊戲存檔</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">05</span>
+      <span class="concept-title">短期記憶 vs 長期記憶</span>
+    </h3>
+
+    <div class="compare-box">
+      <div class="compare-col" style="border-top: 5px solid var(--red);">
+        <h4 style="color: var(--red);">⚡ 短期記憶</h4>
+        <ul>
+          <li>你<strong>當前正在跟 AI 對話</strong>的內容</li>
+          <li>隨時能用，但<strong>關掉視窗就沒了</strong></li>
+          <li>就像快捷列上的水藥</li>
+          <li>容量有限（Context Window）</li>
+          <li>新資料會<strong>擠掉</strong>舊資料</li>
+        </ul>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--green);">
+        <h4 style="color: var(--green);">💾 長期記憶</h4>
+        <ul>
+          <li>儲存在<strong>外部資料庫</strong>的歷史紀錄</li>
+          <li>就算過了一個月，Agent 依然記得</li>
+          <li>就像<strong>雲端遊戲存檔</strong></li>
+          <li>容量幾乎無限</li>
+          <li>可以<strong>跨對話</strong>調閱</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rpg-stat">
+      <div class="rpg-stat-item" style="border-top: 5px solid var(--red);">
+        <div class="rpg-stat-label">⚡ 短期記憶</div>
+        <div class="rpg-stat-value" style="font-size:18px;">~4K tokens</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:6px;">關掉就消失<br>像打開的瀏覽器分頁</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top: 5px solid var(--green);">
+        <div class="rpg-stat-label">💾 長期記憶</div>
+        <div class="rpg-stat-value" style="font-size:18px;">無限容量</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:6px;">永久保存<br>像 Google Drive 雲端硬碟</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">💡 實戰例子：</div>
+      <strong>短期記憶：</strong>你跟 Agent 聊了 10 分鐘「今天心情不好」，關掉視窗後再開，它完全忘了這件事<br>
+      <strong>長期記憶：</strong>你曾告訴 Agent「我叫小明、我對花生過敏」，一個月後再開對話，它依然記得「小明，你上次說對花生過敏，這道菜有花生，要不要換一道？」
+    </div>
+  </div>
+
+  <!-- ===== Concept 06 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：戰鬥中即時翻閱《怪物百科全書》</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">06</span>
+      <span class="concept-title">RAG（檢索增強生成）</span>
+    </h3>
+
+    <div class="concept-text">
+      AI 不需要把全世界的所有知識都硬背進大腦。<span class="highlight">RAG（Retrieval-Augmented Generation）</span>就像是：
+    </div>
+
+    <div class="flow-diagram">
+      <div style="font-size: 14px; color: var(--text-light); margin-bottom: 12px;">📖 RAG 流程圖</div>
+      <div class="flow-row">
+        <div class="flow-step" style="border-color: var(--orange);">
+          🙋 使用者提問<br><span class="flow-label">「公司去年營收多少？」</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--blue);">
+          🔍 檢索文件庫<br><span class="flow-label">去翻《公司年報》</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--green);">
+          📋 找到相關段落<br><span class="flow-label">年報第 15 頁</span>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" style="border-color: var(--purple);">
+          🧠 生成回答<br><span class="flow-label">「去年營收 5 億」</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong class="key-point">RAG 的三大優勢：</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">不胡說八道</span>：有資料庫撐腰，不會「幻覺」編造數字</li>
+      <li><span class="highlight">不用重新訓練</span>：更新文件庫就好，省下幾百萬訓練費</li>
+      <li><span class="highlight">可追溯來源</span>：可以告訴你「這個答案來自年報第 15 頁」</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      想像你在考試，有兩種做法：<br>
+      <strong>不使用 RAG：</strong>把整本課本背起來（硬訓練模型），考試時靠記憶回答<br>
+      <strong>使用 RAG：</strong>考試可以翻書（檢索文件庫），找到正確頁面後回答（又快又準！）
+    </div>
+  </div>
+
+  <!-- ===== Day 3 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第三天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode 中問：「我叫小明，我喜歡吃義大利麵」，然後問「我喜歡吃什麼？」—— 確認短期記憶有效</li>
+      <li>關掉對話視窗，重新開啟，問「我喜歡吃什麼？」—— 觀察短期記憶消失</li>
+      <li>在 OpenCode 中上傳一份文件（如學校課表），問「我星期三有什麼課？」—— 體會 RAG 的威力</li>
+      <li>寫下：短期記憶和長期記憶在生活中有什麼類似例子？（提示：手機 vs 雲端相簿）</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的對話截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                        DAY 4                                  -->
+<!-- ============================================================ -->
+<div class="day-card day2">
+  <div class="day-header">
+    <div class="day-title">📅 第四天：Vector DB + Embeddings + Context Engineering</div>
+    <div class="day-subtitle">今天你會學到：電腦怎麼「理解」文字的意思？怎麼整理背包？</div>
+  </div>
+
+  <!-- ===== Concept 07 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：藏寶圖的 3D 空間 GPS 座標</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">07</span>
+      <span class="concept-title">Vector DB 與 Embeddings</span>
+    </h3>
+
+    <div class="concept-text">
+      電腦不懂文字的浪漫，只懂數字。<span class="highlight">Embeddings</span> 會把文字轉換成多維度的數字向量（空間座標），把含意相近的詞擺在一起。
+    </div>
+
+    <!-- Vector Visual -->
+    <div class="vector-visual">
+      <div style="text-align:center;">
+        <div class="vector-word vector-near">🐱 貓</div>
+        <div style="font-size:13px; color:var(--green); margin-top:4px;">座標：(0.8, 0.9, 0.1)</div>
+      </div>
+      <div style="font-size:14px; color:var(--green);">← 很近！→</div>
+      <div style="text-align:center;">
+        <div class="vector-word vector-near">🐕 狗</div>
+        <div style="font-size:13px; color:var(--green); margin-top:4px;">座標：(0.7, 0.8, 0.2)</div>
+      </div>
+      <div style="font-size:14px; color:var(--red); margin: 0 20px;">← 很遠 ✕ →</div>
+      <div style="text-align:center;">
+        <div class="vector-word vector-far">📻 微波爐</div>
+        <div style="font-size:13px; color:var(--red); margin-top:4px;">座標：(0.1, 0.2, 0.9)</div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <span class="highlight">Vector DB（向量資料庫）</span>就是儲存這些座標的超級圖書館，能讓 Agent 在 <strong>0.01 秒</strong>內用「意思很像」來找到資料！
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      想像一張地圖：<br>
+      <strong>「貓」</strong>在台北市的座標是 (25.03, 121.56)<br>
+      <strong>「狗」</strong>在新北市的座標是 (25.01, 121.47) — 很近！<br>
+      <strong>「微波爐」</strong>在美國的座標是 (37.77, -122.41) — 超遠！<br><br>
+      Vector DB 就是這張「語義地圖」，讓 Agent 用<strong>意思</strong>而不是<strong>關鍵字</strong>來搜尋。
+    </div>
+  </div>
+
+  <!-- ===== Concept 08 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：背包空間整理術 / 整理裝備防 Lag</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">08</span>
+      <span class="concept-title">Context Engineering（情境工程）</span>
+    </h3>
+
+    <div class="concept-text">
+      既然視野（Context Window）有限，就不能把雜物都塞給 Agent。<span class="highlight">Context Engineering</span> 就是極致的「背包整理術」：
+    </div>
+
+    <div class="compare-box">
+      <div class="compare-col" style="border-top: 5px solid var(--red);">
+        <h4 style="color: var(--red);">❌ 沒有整理背包</h4>
+        <div style="background:var(--soft); padding:10px; border-radius:8px; font-size:15px; font-family:monospace;">
+          塞入：100頁PDF + 舊對話 + 閒聊<br>
+          + 不相關新聞 + 完整程式碼<br>
+          → Agent 被資訊淹沒，回答變慢<br>
+          → 舊記憶被擠掉，「失憶」了！
+        </div>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--green);">
+        <h4 style="color: var(--green);">✅ 整理過的背包</h4>
+        <div style="background:var(--soft); padding:10px; border-radius:8px; font-size:15px; font-family:monospace;">
+          精選：摘要 + 關鍵段落<br>
+          + 最近5輪對話 + 相關檔案<br>
+          → Agent 思考更快、更精準<br>
+          → 重要記憶不會被擠掉！
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong>Context Engineering 的四大技巧：</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">刪除垃圾</span>：無關的舊對話、過時的資料直接砍掉</li>
+      <li><span class="highlight">精簡摘要</span>：100 頁文件壓縮成 1 頁重點</li>
+      <li><span class="highlight">排優先序</span>：最重要的資訊放在最前面（Agent 最容易看到）</li>
+      <li><span class="highlight">分段處理</span>：大任務切成小塊，每塊只塞必要的上下文</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      你在玩 RPG 時，背包空間只有 20 格：<br>
+      <strong>不整理：</strong>塞了 20 個低級藥水，遇到 Boss 時沒有空間放神器<br>
+      <strong>整理後：</strong>只帶 5 個高級藥水 + 3 把武器 + 2 個捲軸，打 Boss 時從容應對<br><br>
+      <strong class="key-point">Context Engineering 就是 Agent 的「背包整理師」！</strong>
+    </div>
+  </div>
+
+  <!-- ===== Day 4 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第四天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode 中，先問「台北有哪些景點？」，再問「巴黎有哪些景點？」，再問「我前面問的第一個城市的景點有哪些？」—— 觀察 Agent 有沒有記得「台北」</li>
+      <li>把一份長文件（超過 1000 字）貼給 Agent，問「幫我摘要這份文件的 3 個重點」—— 體會 Context Engineering 的「精簡」</li>
+      <li>問 Agent：「如果我有 100 個客人的資料，你會怎麼快速找到我想要的那一個？」—— 引導它提到 Vector DB</li>
+      <li>寫下：為什麼「整理背包」比「買更大的背包」更重要？</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的對話截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    DAY 5: REVIEW + CHALLENGE                  -->
+<!-- ============================================================ -->
+<div class="day-card day3">
+  <div class="day-header">
+    <div class="day-title">📅 第五天：複習 + 第二章小挑戰</div>
+    <div class="day-subtitle">回顧記憶系統四大概念，挑戰搭建「有記憶的 Agent」！</div>
+  </div>
+
+  <div class="concept-card" style="border-left: 5px solid var(--purple);">
+    <h3 style="margin:0; color:var(--purple);">📖 複習時間（30 分鐘）</h3>
+    <div class="concept-text" style="margin-top:10px;">
+      <strong>快速回顧四個概念：</strong>
+    </div>
+    <div class="rpg-stat" style="margin-top:10px;">
+      <div class="rpg-stat-item" style="border-top:5px solid var(--red);">
+        <div style="font-size:15px; color:var(--red); font-weight:800;">05 短期記憶</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">對話中的記憶<br>關掉就消失</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--green);">
+        <div style="font-size:15px; color:var(--green); font-weight:800;">06 RAG</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">即時翻書查資料<br>不胡說八道</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--blue);">
+        <div style="font-size:15px; color:var(--blue); font-weight:800;">07 Vector DB</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">用「意思」搜尋<br>0.01秒找到</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--orange);">
+        <div style="font-size:15px; color:var(--orange); font-weight:800;">08 Context Eng.</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">背包整理術<br>精準不浪費</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    CHAPTER 2 CHALLENGE                        -->
+<!-- ============================================================ -->
+<div class="challenge-box">
+  <div class="challenge-title">⚔️ 第二章小挑戰：搭建帶記憶的 Agent</div>
+  <div class="challenge-subtitle">運用記憶系統的四大概念，讓 Agent 記住你是誰！</div>
+
+  <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:16px;">
+    <h4 style="margin:0 0 8px; color:#ff9600; font-size:17px;">🎯 挑戰目標</h4>
+    <p style="margin:0; font-size:15px; color:#3c3c3c;">
+      用 <strong>OpenCode GUI</strong> 搭建一個對話 Agent，能記得你的個人資訊，並在對話中主動引用。<br>
+      提交對話截圖 + 程式碼（或對話紀錄）+ 300 字說明。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務一：建立長期記憶</h4>
+    <p>
+      在對話開始時，告訴 Agent 以下資訊：<br>
+      <code>「我叫小明，我是國中二年級學生，我對花生過敏，我的生日是 3月15日，我最喜歡的科目是數學」</code>
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務二：驗證記憶</h4>
+    <p>
+      問 Agent 以下問題，確認它有記得：<br>
+      1. 「我叫什麼名字？」<br>
+      2. 「我有沒有什麼過敏？」<br>
+      3. 「我最喜歡什麼科目？」<br>
+      4. 「幫我規劃一個生日行程」（觀察它有沒有用到 3/15 這個日期）
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務三：跨話題測試</h4>
+    <p>
+      先聊 5 個不相關的話題（如：今天天氣、最近電影、歷史故事、數學問題、一首歌），<br>
+      然後問：「我之前說我對什麼東西過敏？」—— 觀察 Agent 有沒有「金魚腦」失憶。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務四：撰寫 300 字說明</h4>
+    <p>
+      寫下：<br>
+      1. 短期記憶和長期記憶在你的實作中如何運作？（2-3 句）<br>
+      2. 如果用 RAG 架構，你會把「小明的資料」存在哪裡？（2-3 句）<br>
+      3. Context Engineering 在你的對話中有什麼影響？（2-3 句）<br>
+      4. 畫一個簡單的流程圖，說明 Agent 如何「記住」你的資訊
+    </p>
+  </div>
+
+  <h4 style="color:#ff9600; margin:18px 0 8px;">📋 評分標準</h4>
+  <table class="rubric-table">
+    <tr>
+      <th>評分項目</th>
+      <th>分數</th>
+      <th>說明</th>
+    </tr>
+    <tr>
+      <td>✅ 長期記憶建立</td>
+      <td>25 分</td>
+      <td>Agent 能正確記住 5 項個人資訊</td>
+    </tr>
+    <tr>
+      <td>✅ 記憶驗證</td>
+      <td>25 分</td>
+      <td>Agent 能正確回答所有問題，並主動引用生日</td>
+    </tr>
+    <tr>
+      <td>✅ 跨話題測試</td>
+      <td>25 分</td>
+      <td>在聊了 5 個話題後，Agent 仍記得過敏資訊</td>
+    </tr>
+    <tr>
+      <td>✅ 300 字說明</td>
+      <td>25 分</td>
+      <td>能用自己的話解釋 4 個概念，流程圖正確</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== Summary ===== -->
+<div class="summary-box">
+  <div class="summary-title">📦 第二章關鍵詞總結</div>
+  <div class="keyword-tags">
+    <span class="keyword-tag">短期記憶</span>
+    <span class="keyword-tag">長期記憶</span>
+    <span class="keyword-tag">RAG</span>
+    <span class="keyword-tag">Embeddings</span>
+    <span class="keyword-tag">Vector DB</span>
+    <span class="keyword-tag">Context Engineering</span>
+    <span class="keyword-tag">背包整理術</span>
+  </div>
+
+  <div class="tomorrow-box">
+    <div class="tomorrow-label">🔮 明天預告：第三章 — 武器庫（能力與外部協定）</div>
+    我們會學習 Tool Use、MCP、ComfyUI 畫圖、Notion MCP！<br>
+    準備好讓你的 Agent 擁有「動手能力」了嗎？
+  </div>
+</div>
+
+<!-- ===== Badge ===== -->
+<div class="badge-section">
+  <div class="badge-icon">🎒</div>
+  <div class="badge-text">第二章通關徽章：裝備庫大師</div>
+  <div class="badge-sub">你已學會記憶系統四大概念，Agent 不再是金魚腦了！</div>
+</div>
+
+<nav class="nav-footer">
+  <a class="nav-prev" href="chapter1.html">← 上一章：01 新手村</a>
+  <a class="nav-next" href="chapter3.html">下一章：03 武器庫 →</a>
+</nav>
+
+<div class="footer">
+  🎮 AI Agent 14天課程・第二章：裝備庫 • 記憶與資訊檢索
+</div>
+
+</body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第四章：冒險小隊 — 多 Agent 協作與安全</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root {
+    --green: #58cc02;
+    --green-dark: #46a302;
+    --blue: #1cb0f6;
+    --orange: #ff9600;
+    --red: #ff4b4b;
+    --purple: #ce82ff;
+    --text: #3c3c3c;
+    --text-light: #8a8a8a;
+    --bg: #fffdf8;
+    --card: #ffffff;
+    --line: #e5e5e5;
+    --soft: #f7f7f7;
+  }
+  body {
+    font-family: 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', -apple-system, sans-serif;
+    background: linear-gradient(180deg, #f3ebfb 0%, var(--bg) 45%, var(--bg) 100%) fixed; color: var(--text);
+    margin: 0; padding: 40px 20px; max-width: 900px; margin-left: auto; margin-right: auto;
+    font-size: 16px; line-height: 1.8;
+  }
+  h1, h2, h3, h4 { line-height: 1.4; }
+
+  .header-card {
+    background: linear-gradient(135deg, var(--purple) 0%, #d9a6ff 100%);
+    border-radius: 24px; padding: 40px 36px; text-align: center;
+    margin-bottom: 36px; color: #fff;
+  }
+  .header-title { font-size: 34px; font-weight: 800; margin: 0 0 10px; letter-spacing: 1px; }
+  .header-subtitle { font-size: 18px; margin: 0; opacity: 0.95; }
+  .badge-bar { margin-top: 16px; }
+  .badge {
+    display: inline-block; background: rgba(255,255,255,0.25); color: #fff;
+    padding: 6px 16px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin: 4px; letter-spacing: 0.5px;
+  }
+
+  .progress-section { margin-bottom: 32px; }
+  .progress-label { font-size: 14px; color: var(--text-light); margin-bottom: 8px; font-weight: 600; }
+  .progress-bar-bg { background: #ececec; border-radius: 999px; height: 26px; overflow: hidden; position: relative; }
+  .progress-bar-fill {
+    height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--purple), #d9a6ff);
+    display: flex; align-items: center; padding-left: 16px; font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .progress-steps { display: flex; flex-wrap: wrap; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--text-light); font-weight: 600; }
+  .progress-steps span.done { color: var(--green); }
+  .progress-steps span.active { color: var(--purple); }
+
+  .day-card {
+    background: var(--card); border: 2px solid var(--line); border-radius: 20px;
+    padding: 30px; margin-bottom: 32px;
+  }
+  .day-card.day9 { border-top: 6px solid var(--blue); }
+  .day-card.day10 { border-top: 6px solid var(--red); }
+  .day-header { margin-bottom: 20px; border-bottom: 2px dashed var(--line); padding-bottom: 14px; }
+  .day-title { font-size: 24px; font-weight: 800; margin: 0; }
+  .day-subtitle { font-size: 15px; color: var(--text-light); margin-top: 4px; }
+
+  .concept-card {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; margin-bottom: 20px;
+  }
+  .concept-num {
+    display: inline-block; background: var(--purple); color: #fff;
+    width: 40px; height: 40px; border-radius: 50%; text-align: center;
+    line-height: 40px; font-size: 18px; font-weight: 800; margin-right: 12px; vertical-align: middle;
+  }
+  .concept-title { font-size: 21px; font-weight: 800; color: var(--text); vertical-align: middle; }
+  .metaphor-tag {
+    display: inline-block; background: #f6ecff; color: var(--purple);
+    padding: 4px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .concept-text { color: var(--text); font-size: 16px; margin: 12px 0; }
+  .highlight { color: var(--purple); font-weight: 700; }
+  .key-point { color: var(--green); font-weight: 700; }
+
+  .compare-box { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .compare-col {
+    flex: 1 1 260px; background: var(--card); border-radius: 14px; padding: 18px;
+    border: 1px solid var(--line); min-width: 240px;
+  }
+  .compare-col h4 { margin: 0 0 10px; font-size: 17px; font-weight: 800; }
+  .compare-col ul { margin: 0; padding-left: 20px; }
+  .compare-col li { font-size: 15px; margin-bottom: 6px; }
+
+  .flow-diagram {
+    background: var(--card); border-radius: 14px; padding: 24px; margin: 16px 0;
+    text-align: center; border: 1px solid var(--line);
+  }
+  .flow-row { display: flex; align-items: center; justify-content: center; gap: 4px; flex-wrap: wrap; }
+  .flow-step {
+    background: var(--soft); border: 2px solid var(--purple); border-radius: 14px;
+    padding: 14px 18px; font-size: 16px; font-weight: 800; color: var(--text);
+    min-width: 110px; text-align: center;
+  }
+  .flow-arrow { font-size: 22px; color: var(--text-light); margin: 0 4px; flex-shrink: 0; }
+  .flow-label { font-size: 13px; color: var(--text-light); display: block; margin-top: 4px; font-weight: 400; }
+
+  .raid-diagram {
+    background: var(--card); border-radius: 16px; padding: 30px; margin: 16px 0;
+    text-align: center; border: 2px solid var(--purple);
+  }
+  .raid-title { font-size: 17px; font-weight: 800; color: var(--purple); margin-bottom: 20px; }
+  .raid-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .raid-role { border-radius: 14px; padding: 18px 20px; color: #fff; min-width: 150px; font-size: 15px; font-weight: 800; }
+  .raid-role.leader { background: var(--blue); }
+  .raid-role.tank { background: var(--red); }
+  .raid-role.healer { background: var(--green); }
+  .raid-role.dps { background: var(--orange); }
+  .raid-line { text-align: center; color: var(--text-light); font-size: 13px; margin-top: 14px; }
+
+  .rpg-stat { display: flex; gap: 16px; margin: 16px 0; flex-wrap: wrap; }
+  .rpg-stat-item {
+    flex: 1 1 200px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px; text-align: center; min-width: 180px;
+  }
+  .rpg-stat-label { font-size: 14px; color: var(--text-light); font-weight: 700; letter-spacing: 0.5px; }
+  .rpg-stat-value { font-size: 22px; font-weight: 800; color: var(--orange); margin: 6px 0; }
+  .rpg-stat-bar { height: 10px; background: #ececec; border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .rpg-stat-bar-fill { height: 100%; border-radius: 999px; }
+  .rpg-stat-bar-fill.hp { background: var(--red); }
+  .rpg-stat-bar-fill.mp { background: var(--purple); }
+  .rpg-stat-bar-fill.sp { background: var(--green); }
+
+  .example-box {
+    background: #f6ecff; border-left: 5px solid var(--purple);
+    padding: 14px 16px; font-size: 15px; border-radius: 0 12px 12px 0; margin-top: 10px;
+  }
+  .example-title { color: var(--purple); font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+
+  .practice-box {
+    background: #eafaf0; border: 2px solid var(--green); border-radius: 16px; padding: 24px; margin: 18px 0;
+  }
+  .practice-title { color: var(--green); font-size: 20px; font-weight: 800; margin: 0 0 14px; }
+  .practice-box p { color: var(--text); }
+  .step-list { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .step-list li {
+    counter-increment: step; padding: 12px 14px 12px 64px; margin-bottom: 8px;
+    background: var(--card); border-radius: 12px; font-size: 15px; position: relative;
+  }
+  .step-list li::before {
+    content: "Step " counter(step); position: absolute; left: 12px; top: 12px;
+    background: var(--green); color: #fff; font-size: 12px; font-weight: 800;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .screenshot-frame {
+    background: #fff; border: 2px dashed #d0d0d0; border-radius: 14px;
+    min-height: 130px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-light); font-size: 15px; margin: 12px 0;
+  }
+
+  .confirm-window {
+    background: var(--card); border: 2px solid var(--green); border-radius: 14px;
+    padding: 20px; margin: 14px 0; font-size: 15px;
+  }
+  .confirm-title { color: var(--green); font-weight: 800; font-size: 16px; margin-bottom: 8px; }
+  .confirm-msg { color: var(--text); margin-bottom: 14px; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-btn {
+    border-radius: 12px; padding: 10px 24px; font-weight: 700; font-size: 15px;
+    border: 2px solid; cursor: pointer; text-align: center;
+  }
+  .confirm-btn.yes { background: var(--green); color: #fff; border-color: var(--green); }
+  .confirm-btn.no { background: #fff; color: var(--red); border-color: var(--red); }
+
+  .challenge-box {
+    background: #fff7ea; border: 3px solid var(--orange); border-radius: 20px;
+    padding: 28px; margin: 24px 0;
+  }
+  .challenge-title { color: var(--orange); font-size: 24px; font-weight: 800; margin: 0 0 8px; }
+  .challenge-subtitle { color: var(--text-light); font-size: 16px; margin-bottom: 16px; }
+  .challenge-task {
+    background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    border-left: 5px solid var(--orange);
+  }
+  .challenge-task h4 { margin: 0 0 6px; color: var(--orange); font-size: 17px; }
+  .challenge-task p { margin: 0; font-size: 15px; color: var(--text); }
+  .rubric-table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 15px; background: var(--card); border-radius: 12px; overflow: hidden; }
+  .rubric-table th { background: var(--orange); color: #fff; padding: 12px; text-align: left; }
+  .rubric-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--text); }
+  .rubric-table tr:nth-child(even) td { background: #fffaf2; }
+
+  .summary-box { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; margin-top: 20px; }
+  .summary-title { color: var(--green); font-weight: 800; font-size: 18px; margin-bottom: 12px; }
+  .keyword-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .keyword-tag {
+    background: var(--soft); border: 1px solid var(--line); border-radius: 999px;
+    padding: 6px 14px; font-size: 14px; font-weight: 600;
+  }
+  .tomorrow-box {
+    background: #f6ecff; border-left: 5px solid var(--purple);
+    padding: 14px 16px; border-radius: 0 12px 12px 0; margin-top: 16px; font-size: 15px;
+  }
+  .tomorrow-label { color: var(--purple); font-weight: 800; font-size: 15px; }
+
+  .badge-section {
+    text-align: center; margin: 32px 0 16px; padding: 32px; background: linear-gradient(135deg, var(--purple), #d9a6ff);
+    border-radius: 20px; color: #fff;
+  }
+  .badge-icon { font-size: 48px; margin-bottom: 10px; }
+  .badge-text { font-size: 22px; font-weight: 800; }
+  .badge-sub { font-size: 15px; margin-top: 6px; opacity: 0.95; }
+
+  .footer { text-align: center; font-size: 14px; color: var(--text-light); margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line); }
+
+  ul { margin: 6px 0; padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  code {
+    background: #f0f0f0; padding: 2px 8px; border-radius: 6px;
+    font-family: 'Consolas', 'SF Mono', monospace; font-size: 14px; color: var(--blue);
+  }
+  .section-divider { border: none; border-top: 2px dashed var(--line); margin: 36px 0; }
+
+  /* ===== Nav Bar ===== */
+  .nav-bar {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px;
+    background: var(--card); border: 2px solid var(--line); border-radius: 16px;
+    padding: 12px 16px; margin-bottom: 28px;
+  }
+  .nav-label { font-size: 14px; font-weight: 800; color: var(--text-light); margin-right: 6px; }
+  .nav-link {
+    display: inline-block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 700;
+    color: var(--text); text-decoration: none; border: 2px solid var(--line); background: var(--soft);
+    transition: 0.15s;
+  }
+  .nav-link:hover { border-color: var(--blue); color: var(--blue); }
+  .nav-link.current { color: #fff; border-color: transparent; }
+  .nav-footer { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .nav-prev, .nav-next {
+    display: inline-block; padding: 10px 18px; border-radius: 12px; font-weight: 800; font-size: 15px;
+    text-decoration: none; color: #fff; transition: 0.15s;
+  }
+  .nav-prev { background: var(--text-light); }
+  .nav-prev:hover { opacity: 0.85; }
+  .nav-next { background: var(--green); }
+  .nav-next:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<nav class="nav-bar">
+  <span class="nav-label">📚 章節導覽</span>
+  <a class="nav-link" href="chapter1.html">01 新手村</a>
+  <a class="nav-link" href="chapter2.html">02 裝備庫</a>
+  <a class="nav-link" href="chapter3.html">03 武器庫</a>
+  <a class="nav-link current" style="background:var(--purple);" href="chapter4.html">04 冒險小隊</a>
+  <a class="nav-link" href="chapter5.html">05 高階心法</a>
+</nav>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header-card">
+  <div class="header-title">👥 第四章：冒險小隊 — 多 Agent 協作與安全</div>
+  <div class="header-subtitle">解決「單打獨鬥」！讓你的 Agent 學會團隊作戰 + 保護自己！</div>
+  <div class="badge-bar">
+    <span class="badge">📖 14天課程・第 9-11 天</span>
+    <span class="badge">🎒 RPG 冒險教學</span>
+    <span class="badge">🎯 概念 12-15</span>
+  </div>
+</div>
+
+<!-- ===== Progress ===== -->
+<div class="progress-section">
+  <div class="progress-label">📊 課程進度</div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" style="width: 64%;">第 9 天 / 14 天</div>
+  </div>
+  <div class="progress-steps">
+    <span class="done">✅ 第一章</span>
+    <span class="done">✅ 第二章</span>
+    <span class="done">✅ 第三章</span>
+    <span class="active">📖 第四章</span>
+    <span>⬜ 第五章</span>
+  </div>
+</div>
+
+<!-- ===== RPG Stats ===== -->
+<div class="rpg-stat">
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">HP（生命值）</div>
+    <div class="rpg-stat-value">150</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill hp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">MP（魔法值）</div>
+    <div class="rpg-stat-value">100</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill mp" style="width:100%"></div></div>
+  </div>
+  <div class="rpg-stat-item">
+    <div class="rpg-stat-label">EXP（經驗值）</div>
+    <div class="rpg-stat-value">Lv.4</div>
+    <div class="rpg-stat-bar"><div class="rpg-stat-bar-fill sp" style="width:40%"></div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!--                        DAY 9                                  -->
+<!-- ============================================================ -->
+<div class="day-card">
+  <div class="day-header">
+    <div class="day-title">📅 第九天：多 Agent 協作</div>
+    <div class="day-subtitle">今天你會學到：怎麼讓「一群 AI」組成團隊、分工合作？</div>
+  </div>
+
+  <!-- ===== Concept 12 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：組隊打副本「多人合作 RAID」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">12</span>
+      <span class="concept-title">Multi-Agent（多 Agent 系統）</span>
+    </h3>
+
+    <div class="concept-text">
+      一個 Agent 能力有限。但是 <span class="highlight">多個 Agent 分工合作</span>，就像是組了一支<strong>冒險小隊</strong>，每個人都有專長！
+    </div>
+
+    <!-- Raid Diagram -->
+    <div class="raid-diagram">
+      <div class="raid-title">⚔️ 冒險小隊分工示意圖</div>
+      <div class="raid-row">
+        <div class="raid-role leader">👑 隊長<br><span style="font-weight:400;font-size:12px;">分配任務、決策</span></div>
+        <div class="raid-role tank">🛡️ 坦克<br><span style="font-weight:400;font-size:12px;">承受傷害、抵抗攻擊</span></div>
+        <div class="raid-role healer">💚 治療師<br><span style="font-weight:400;font-size:12px;">修復錯誤、補充資源</span></div>
+        <div class="raid-role dps">⚔️ 輸出<br><span style="font-weight:400;font-size:12px;">快速處理任務</span></div>
+      </div>
+      <div class="raid-line">每個角色各司其職，合力打敗 Boss！</div>
+    </div>
+
+    <div class="concept-text">
+      <strong>多 Agent 系統的三種常見架構：</strong>
+    </div>
+    <div class="compare-box">
+      <div class="compare-col" style="border-top: 5px solid var(--blue);">
+        <h4 style="color: var(--blue);">🏗️ 階層式</h4>
+        <ul>
+          <li>一個「領導者」Agent 分配任務給「員工」Agent</li>
+          <li>適合層級分明的組織</li>
+          <li>例如：主管 → 員工</li>
+        </ul>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--green);">
+        <h4 style="color: var(--green);">🤝 平行式</h4>
+        <ul>
+          <li>多個 Agent<strong>同時</strong>處理不同任務</li>
+          <li>適合需要大量產出的工作</li>
+          <li>例如：多個翻譯員同時翻不同章節</li>
+        </ul>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--orange);">
+        <h4 style="color: var(--orange);">🔄 接力式</h4>
+        <ul>
+          <li>像接力賽，每個 Agent 處理完交給下一個</li>
+          <li>適合有順序的流程</li>
+          <li>例如：草稿 → 校稿 → 完稿</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      如果只有一位全能英雄，很累而且容易出錯。<br>
+      但組一個小隊分工合作：<br>
+      <strong>隊長</strong>負責指揮、<strong>坦克</strong>負責吸引仇恨、<strong>治療師</strong>負責補血、<strong>輸出</strong>負責打傷害 —— 整個團隊效率提升好幾倍！<br><br>
+      <strong class="key-point">多 Agent 系統 = 把大任務拆給不同專長的 AI 分工合作</strong>
+    </div>
+  </div>
+
+  <!-- ===== Day 9 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第九天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode 中，開啟多個 Agent，分別指派不同任務（例如：一個負責寫開頭、一個負責蒐集資料、一個負責總結）</li>
+      <li>對同一任務給「不同角色設定的 Agent」處理，比較差異（例如：一個扮演樂觀的、一個扮演謹慎的）</li>
+      <li>設計一個 3 人小隊分工表：寫下每個 Agent 的角色、任務、負責範圍</li>
+      <li>寫下：單一 Agent 和多 Agent 合作，各有哪些優缺點？</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的多 Agent 協作截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                        DAY 10                                 -->
+<!-- ============================================================ -->
+<div class="day-card day9">
+  <div class="day-header">
+    <div class="day-title">📅 第十天：Delegation 與安全</div>
+    <div class="day-subtitle">今天你要學會：怎麼安全地「授權」AI 幫你做事！</div>
+  </div>
+
+  <!-- ===== Concept 13 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：把「寶刀」借給隊友</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">13</span>
+      <span class="concept-title">Delegation（授權任務）</span>
+    </h3>
+
+    <div class="concept-text">
+      <span class="highlight">Delegation</span> 就是把任務授權給 Agent 處理。但就像借寶刀給隊友，要<strong>想清楚該給多大力道</strong>！
+    </div>
+
+    <div class="rpg-stat">
+      <div class="rpg-stat-item" style="border-top:5px solid var(--green);">
+        <div class="rpg-stat-label" style="color:var(--green);">💪 完全授權（Full Autonomy）</div>
+        <div style="font-size:15px; color:var(--text);">Agent 自己決定所有事</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">適合：重複、無風險的任務</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--orange);">
+        <div class="rpg-stat-label" style="color:var(--orange);">🧭 部分授權（Semi-Autonomy）</div>
+        <div style="font-size:15px; color:var(--text);">Agent 先提案，你審核</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">適合：需要人判斷的任務</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--red);">
+        <div class="rpg-stat-label" style="color:var(--red);">🚦 需同意（Human-in-the-loop）</div>
+        <div style="font-size:15px; color:var(--text);">重要動作必須問你</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">適合：花錢、刪除、發文等</div>
+      </div>
+    </div>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      你有一把傳說的寶刀：<br>
+      <strong>交給陌生人</strong>：他可能拿去亂砍（危險！）<br>
+      <strong>完全不給</strong>：什麼都要自己來（好累）<br>
+      <strong>聰明的做法</strong>：看清楚任務再決定給多少權限！<br><br>
+      <span class="key-point">「授權」不是「放手不管」，而是「看清楚任務再決定給多少權限」</span>
+    </div>
+  </div>
+
+  <!-- ===== Concept 14 ===== -->
+  <div class="concept-card">
+    <div class="metaphor-tag">🎮 遊戲比喻：主角世界的「魔法護盾」</div>
+    <h3 style="margin:0;">
+      <span class="concept-num">14</span>
+      <span class="concept-title">安全防護（Safety & Guardrails）</span>
+    </h3>
+
+    <div class="concept-text">
+      AI 很強大，但也可能<strong>做錯事</strong>。我們需要 <span class="highlight">Guardrails（安全護欄）</span> 來保護自己：
+    </div>
+
+    <div class="compare-box">
+      <div class="compare-col" style="border-top: 5px solid var(--red);">
+        <h4 style="color: var(--red);">⚠️ 需要防護的風險</h4>
+        <div style="background:var(--soft); padding:10px; border-radius:8px; font-size:15px;">
+          ❌ 未經允許就刪除檔案<br>
+          ❌ 亂花錢買東西<br>
+          ❌ 回覆不當內容<br>
+          ❌ 洩漏個人資料
+        </div>
+      </div>
+      <div class="compare-col" style="border-top: 5px solid var(--green);">
+        <h4 style="color: var(--green);">🛡️ 三層防護網</h4>
+        <div style="background:var(--soft); padding:10px; border-radius:8px; font-size:15px;">
+          ✅ 規則設定（訂好不能違反的規則）<br>
+          ✅ 流程限制（重要步驟需人工確認）<br>
+          ✅ 事後審計（記錄所有動作可追蹤）
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirm Window -->
+    <div class="confirm-window">
+      <div class="confirm-title">🔐 確認視窗（Human-in-the-loop）</div>
+      <div class="confirm-msg">
+        Agent 想要執行：<strong>「刪除這個資料夾中的 3 個檔案」</strong><br>
+        <span style="font-size:13px; color:var(--text-light);">這是一個不可逆的動作，需要你的確認。</span>
+      </div>
+      <div class="confirm-actions">
+        <div class="confirm-btn yes">✅ 允許</div>
+        <div class="confirm-btn no">❌ 拒絕</div>
+      </div>
+    </div>
+
+    <div class="concept-text">
+      <strong>安全三原則：</strong>
+    </div>
+    <ul>
+      <li><span class="highlight">最小權限</span>：只給 Agent 完成任務所需的最低權限</li>
+      <li><span class="highlight">雙重確認</span>：重要動作（刪除、花錢、發送）要有人工確認</li>
+      <li><span class="highlight">完整紀錄</span>：Agent 做的每個動作都要留下紀錄，出問題可追究</li>
+    </ul>
+
+    <div class="example-box">
+      <div class="example-title">🎮 類比說明：</div>
+      冒險小隊進入地宮時：<br>
+      <strong>亂衝</strong>：隊員走在前面踩到陷阱，全滅！<br>
+      <strong>有偵查兵</strong>：先偵察路線，回報風險，再行動！<br><br>
+      安全護欄就像<strong>偵查兵</strong>，先幫你探險、回報風險，確保整體安全。
+    </div>
+  </div>
+
+  <!-- ===== Day 10 Practice ===== -->
+  <div class="practice-box">
+    <div class="practice-title">🔧 動手做時間（第十天）</div>
+    <ol class="step-list">
+      <li>在 OpenCode 中設定「不要自動刪除任何檔案」的規則，然後叫 Agent 擬一份刪檔任務</li>
+      <li>練習布置一個「減少 email 通知」的任務，觀察它是否只做你要求的事</li>
+      <li>測試：給 Agent 一個「意外發送訊息」的指令，它是否有正確的確認護欄？</li>
+      <li>寫下：為什麼「最小權限」很重要？並列出 3 個需要人工確認的高風險動作</li>
+    </ol>
+    <div class="screenshot-frame">📷 請在此貼上你的安全測試截圖</div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    DAY 11: REVIEW + CHALLENGE                 -->
+<!-- ============================================================ -->
+<div class="day-card day10">
+  <div class="day-header">
+    <div class="day-title">📅 第十一天：複習 + 第四章小挑戰</div>
+    <div class="day-subtitle">回顧多 Agent 協作與安全四大概念，挑戰搭建「安全的小隊」！</div>
+  </div>
+
+  <div class="concept-card" style="border-left: 5px solid var(--purple);">
+    <h3 style="margin:0; color:var(--purple);">📖 複習時間（30 分鐘）</h3>
+    <div class="concept-text" style="margin-top:10px;">
+      <strong>快速回顧兩個概念：</strong>
+    </div>
+    <div class="rpg-stat" style="margin-top:10px;">
+      <div class="rpg-stat-item" style="border-top:5px solid var(--blue);">
+        <div style="font-size:15px; color:var(--blue); font-weight:800;">12 多 Agent</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">團隊分工<br>各司其職</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--green);">
+        <div style="font-size:15px; color:var(--green); font-weight:800;">13 授權任務</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">分配權力<br>責任分明</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--red);">
+        <div style="font-size:15px; color:var(--red); font-weight:800;">14 安全護欄</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">防做錯事<br>防洩密</div>
+      </div>
+      <div class="rpg-stat-item" style="border-top:5px solid var(--orange);">
+        <div style="font-size:15px; color:var(--orange); font-weight:800;">15 人工監督</div>
+        <div style="font-size:14px; color:var(--text-light); margin-top:4px;">重要步驟<br>人類把關</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<!-- ============================================================ -->
+<!--                    CHAPTER 4 CHALLENGE                        -->
+<!-- ============================================================ -->
+<div class="challenge-box">
+  <div class="challenge-title">⚔️ 第四章小挑戰：組建你的「AI 冒險小隊」</div>
+  <div class="challenge-subtitle">運用多 Agent 協作 + 安全防護，打造一個團隊協作系統！</div>
+
+  <div style="background:#fff; border-radius:12px; padding:16px; margin-bottom:16px;">
+    <h4 style="margin:0 0 8px; color:#ff9600; font-size:17px;">🎯 挑戰目標</h4>
+    <p style="margin:0; font-size:15px; color:#3c3c3c;">
+      用 <strong>OpenCode GUI</strong> 組建一個「AI 冒險小隊」，由至少 3 個不同角色的 Agent 分工合作完成一個專案，並加上安全護欄保護。<br>
+      提交流程截圖 + 分工表 + 300 字報告。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務一：組建你的冒險小隊</h4>
+    <p>
+      設計一支至少 3 人的 AI 小隊，分工如下：<br>
+      1. <strong>隊長 Agent</strong>：負責分配任務、統整結果<br>
+      2. <strong>資料收集 Agent</strong>：負責上網找資料<br>
+      3. <strong>審查 Agent</strong>：負責檢查內容正確性與安全性<br><br>
+      主題任選，例如：<strong>「學校 10 周年校慶」</strong>或 <strong>「我家附近的美食地圖」</strong>
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務二：實際運作小隊</h4>
+    <p>
+      在你的主題上實際讓小隊運作，蒐集 <strong>3 個不同的資料</strong>（如：活動資訊、設施介紹、歷史沿革），<br>
+      並讓 <strong>審查 Agent</strong> 最終檢查內容<strong>是否正確、有無遺漏、排版是否完整</strong>。
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務三：實作安全護欄</h4>
+    <p>
+      為你的小隊加上安全機制：<br>
+      1. 設定「不得發布個人真實姓名、電話、住址」的規則<br>
+      2. 設定「涉及金錢交易或刪除資料時必須人工確認」<br>
+      3. 示範一次「資料收集 Agent 想進行一個高風險動作」，展示它如何被阻擋
+    </p>
+  </div>
+
+  <div class="challenge-task">
+    <h4>任務四：撰寫 300 字報告</h4>
+    <p>
+      寫下：<br>
+      1. 你設計的小隊有哪些角色？每個角色負責什麼？（3-4 句）<br>
+      2. 多 Agent 合作時，遇到哪些協作上的困難？如何解決？（3 句）<br>
+      3. 安全護欄如何保護你的小隊？如果沒有護欄會發生什麼事？（3 句）<br>
+      4. 下次你還會怎麼改進你的小隊？（2 句）
+    </p>
+  </div>
+
+  <h4 style="color:#ff9600; margin:18px 0 8px;">📋 評分標準</h4>
+  <table class="rubric-table">
+    <tr>
+      <th>評分項目</th>
+      <th>分數</th>
+      <th>說明</th>
+    </tr>
+    <tr>
+      <td>✅ 小隊設計</td>
+      <td>25 分</td>
+      <td>至少 3 個角色，分工明確、職責清楚</td>
+    </tr>
+    <tr>
+      <td>✅ 實際運作</td>
+      <td>25 分</td>
+      <td>成功蒐集 3 個資料，審查 Agent 有效把關</td>
+    </tr>
+    <tr>
+      <td>✅ 安全護欄</td>
+      <td>25 分</td>
+      <td>設定有效護欄，且能示範阻擋高風險動作</td>
+    </tr>
+    <tr>
+      <td>✅ 300 字報告</td>
+      <td>25 分</td>
+      <td>能清楚說明團隊架構與安全機制，具反思</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===== Summary ===== -->
+<div class="summary-box">
+  <div class="summary-title">📦 第四章關鍵詞總結</div>
+  <div class="keyword-tags">
+    <span class="keyword-tag">Multi-Agent</span>
+    <span class="keyword-tag">協作</span>
+    <span class="keyword-tag">Delegation</span>
+    <span class="keyword-tag">授權</span>
+    <span class="keyword-tag">Guardrails</span>
+    <span class="keyword-tag">安全護欄</span>
+    <span class="keyword-tag">Human-in-the-loop</span>
+    <span class="keyword-tag">最小權限</span>
+  </div>
+
+  <div class="tomorrow-box">
+    <div class="tomorrow-label">🔮 明天預告：第五章 — 進階心法與畢業專案</div>
+    我們會學習 Autonomy Spectrum、grill-me skill、Goal LOOP，還有畢業專案！<br>
+    準備好成為真正的「AI Agent 大師」了嗎？
+  </div>
+</div>
+
+<!-- ===== Badge ===== -->
+<div class="badge-section">
+  <div class="badge-icon">👥</div>
+  <div class="badge-text">第四章通關徽章：冒險小隊隊長</div>
+  <div class="badge-sub">你已學會團隊協作與安全防護，成為真正的指揮官！</div>
+</div>
+
+<nav class="nav-footer">
+  <a class="nav-prev" href="chapter3.html">← 上一章：03 武器庫</a>
+  <a class="nav-next" href="chapter5.html">下一章：05 高階心法 →</a>
+</nav>
+
+<div class="footer">
+  🎮 AI Agent 14天課程・第四章：冒險小隊 • 多 Agent 協作與安全
+</div>
+
+</body>
+</html>
