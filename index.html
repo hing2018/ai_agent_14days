@@ -99,6 +99,7 @@
   .chapter-top.ch3 { border-top: 6px solid var(--orange); }
   .chapter-top.ch4 { border-top: 6px solid var(--purple); }
   .chapter-top.ch5 { border-top: 6px solid #1f5f8b; }
+  .chapter-top.chsupp { border-top: 6px dashed #7c9cff; }
 
   .chapter-num {
     display: inline-flex; align-items: center; justify-content: center;
@@ -110,6 +111,7 @@
   .ch3 .chapter-num { background: var(--orange); }
   .ch4 .chapter-num { background: var(--purple); }
   .ch5 .chapter-num { background: #1f5f8b; }
+  .chsupp .chapter-num { background: #7c9cff; border-radius: 14px; }
 
   .chapter-name { font-size: 22px; font-weight: 800; vertical-align: middle; }
   .chapter-tagline { font-size: 15px; color: var(--text-light); margin-top: 8px; line-height: 1.6; }
@@ -137,6 +139,7 @@
   .ch3 .chapter-link { background: var(--orange); }
   .ch4 .chapter-link { background: var(--purple); }
   .ch5 .chapter-link { background: #1f5f8b; }
+  .chsupp .chapter-link { background: #7c9cff; }
 
   /* ===== Formula Section ===== */
   .formula-section {
@@ -189,6 +192,7 @@
     <span class="badge">🎯 15 個核心概念</span>
     <span class="badge">🛠️ 每章實戰挑戰</span>
     <span class="badge">🎓 畢業專案</span>
+    <span class="badge">🧩 額外補充教材</span>
   </div>
 </div>
 
@@ -346,12 +350,33 @@
     </div>
   </div>
 
+  <!-- 額外補充教材 -->
+  <div class="chapter-card">
+    <div class="chapter-top chsupp">
+      <div>
+        <span class="chapter-num">🧩</span>
+        <span class="chapter-name">額外補充 — Multi-Agent 架構總覽 &amp; OpenCode 部署指南</span>
+      </div>
+      <p class="chapter-tagline">一次搞懂多代理的九種組織方式，並在 OpenCode 桌面版 GUI 實際部署階層式 / 平行式 / 接力式三種工作流！（第四章實戰延伸）</p>
+      <div class="chapter-meta">
+        <span class="meta-tag">🌳 階層式</span>
+        <span class="meta-tag">⚡ 平行式</span>
+        <span class="meta-tag">🔄 接力式</span>
+        <span class="meta-tag">🖥️ OpenCode GUI 部署</span>
+      </div>
+    </div>
+    <div class="chapter-bottom">
+      <span class="chapter-days">📖 選讀教材 ・ 建議完成第四章後閱讀</span>
+      <a class="chapter-link" href="supplement-multi-agent.html">閱讀補充 →</a>
+    </div>
+  </div>
+
 </div>
 
 <!-- ===== Footer ===== -->
 <div class="footer">
   <p>📖 AI Agent 由入門至精通 ・ 14 天遊戲化課程</p>
-  <p>以 RPG 冒險風格，帶你從零認識 AI Agent 的核心概念與實作</p>
+  <p>以 RPG 冒險風格，帶你從零認識 AI Agent 的核心概念與實作 ・ <a href="supplement-multi-agent.html">🧩 額外補充：Multi-Agent 架構與 OpenCode 部署</a></p>
 </div>
 
 </body>

@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>額外補充 — Multi-Agent 架構總覽 &amp; OpenCode 部署指南</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-soft: #161a24;
+    --bg-card: #1b2030;
+    --border: #2a3042;
+    --text: #e8eaf2;
+    --text-dim: #9aa3b8;
+    --accent: #7c9cff;
+    --accent-soft: #3c4f8f;
+    --green: #4ade80;
+    --yellow: #facc15;
+    --red: #f87171;
+    --purple: #c084fc;
+    --cyan: #22d3ee;
+    --orange: #fb923c;
+    --mono: "Cascadia Code", "Consolas", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    line-height: 1.7;
+  }
+
+  /* ===== Hero ===== */
+  .hero {
+    padding: 6rem 2rem 4rem;
+    text-align: center;
+    background:
+      radial-gradient(1200px 500px at 50% -100px, var(--accent-soft) 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, #13161f 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .badges { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.4rem; }
+  .hero .badge {
+    font-size: .78rem; padding: .25rem .8rem; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--text-dim); background: rgba(255,255,255,.03);
+  }
+  .hero h1 { font-size: clamp(1.8rem, 4.5vw, 3rem); font-weight: 800; letter-spacing: .02em; }
+  .hero .sub { margin-top: 1rem; color: var(--text-dim); font-size: 1.05rem; max-width: 720px; margin-inline: auto; }
+
+  /* ===== Layout ===== */
+  .wrap { max-width: 1080px; margin-inline: auto; padding: 3rem 1.5rem; }
+  section { margin-bottom: 4.5rem; }
+  h2 {
+    font-size: 1.6rem; font-weight: 700; margin-bottom: 1.6rem;
+    display: flex; align-items: center; gap: .7rem;
+  }
+  h2 .num {
+    background: var(--accent); color: #0f1117; font-size: .95rem; font-weight: 800;
+    width: 2rem; height: 2rem; border-radius: .5rem; display: inline-flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  h3 { font-size: 1.15rem; margin: 1.6rem 0 .8rem; color: var(--text); }
+  p { color: var(--text-dim); margin-bottom: .9rem; }
+  strong { color: var(--text); }
+
+  /* ===== Cards ===== */
+  .grid { display: grid; gap: 1.3rem; }
+  .grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .grid-2 { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem;
+    padding: 1.5rem; position: relative; overflow: hidden;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--accent-soft); }
+  .card .icon { font-size: 1.8rem; }
+  .card h4 { font-size: 1.08rem; margin: .7rem 0 .5rem; }
+  .card .tag {
+    font-size: .72rem; padding: .15rem .6rem; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--text-dim); display: inline-block; margin-bottom: .6rem;
+  }
+  .card ul { margin-left: 1.2rem; color: var(--text-dim); }
+  .card li { margin-bottom: .3rem; }
+
+  /* ===== Code blocks ===== */
+  pre {
+    background: #0c0e15; border: 1px solid var(--border); border-radius: .8rem;
+    padding: 1.4rem; overflow-x: auto; margin: 1rem 0; font-size: .83rem;
+  }
+  pre code { font-family: var(--mono); color: #d6dcf0; line-height: 1.6; }
+  .comment { color: #6b748f; }
+  .key { color: var(--accent); }
+  .str { color: var(--green); }
+  .fileheader {
+    font-family: var(--mono); font-size: .72rem; color: var(--cyan);
+    letter-spacing: .05em; margin-top: 1.4rem; margin-bottom: .2rem;
+  }
+
+  /* ===== Comparison table ===== */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: .8rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; min-width: 640px; }
+  th { background: var(--bg-soft); padding: .8rem 1rem; text-align: left; font-size: .82rem; color: var(--text); }
+  td { padding: .8rem 1rem; border-top: 1px solid var(--border); color: var(--text-dim); }
+  td:first-child { color: var(--text); font-weight: 600; white-space: nowrap; }
+
+  /* ===== Diagram boxes ===== */
+  .diagram {
+    background: #0c0e15; border: 1px solid var(--border); border-radius: .8rem;
+    padding: 1.6rem 1rem; text-align: center; font-family: var(--mono); font-size: .82rem;
+    overflow-x: auto; white-space: pre; margin: 1rem 0; color: #c9d2ea;
+  }
+
+  /* ===== Steps ===== */
+  .steps { counter-reset: step; }
+  .step {
+    position: relative; padding-left: 3.2rem; margin-bottom: 1.8rem;
+  }
+  .step::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 0; top: 0;
+    width: 2.1rem; height: 2.1rem; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .9rem;
+  }
+
+  /* ===== Callout ===== */
+  .callout {
+    border-left: 4px solid var(--accent); background: rgba(124,156,255,.06);
+    padding: 1rem 1.2rem; border-radius: .5rem; margin: 1.2rem 0;
+  }
+  .callout.green { border-color: var(--green); background: rgba(74,222,128,.06); }
+  .callout.yellow { border-color: var(--yellow); background: rgba(250,204,21,.06); }
+  .callout p { margin-bottom: 0; }
+
+  /* ===== Keymap table ===== */
+  kbd {
+    background: #2a3042; border: 1px solid #3a4260; border-bottom-width: 2px;
+    padding: .12rem .5rem; border-radius: .35rem; font-family: var(--mono); font-size: .78rem;
+  }
+
+  /* ===== Course Nav ===== */
+  .course-nav {
+    max-width: 1080px; margin: 0 auto; padding: 1.4rem 1.5rem 0;
+    display: flex; flex-wrap: wrap; align-items: center; gap: .5rem;
+  }
+  .course-nav .nav-label { font-size: .85rem; font-weight: 700; color: var(--text-dim); margin-right: .4rem; }
+  .course-nav a {
+    font-size: .82rem; font-weight: 600; padding: .3rem .85rem; border-radius: 99px;
+    border: 1px solid var(--border); color: var(--text-dim); background: rgba(255,255,255,.03);
+  }
+  .course-nav a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+  .course-nav a.current { background: var(--accent); border-color: var(--accent); color: #0f1117; font-weight: 800; }
+
+  /* ===== Footer ===== */
+  footer {
+    border-top: 1px solid var(--border); padding: 2.5rem 1.5rem; text-align: center;
+    color: var(--text-dim); font-size: .85rem;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<nav class="course-nav">
+  <span class="nav-label">📚 AI Agent 14 天課程導覽</span>
+  <a href="index.html">課程首頁</a>
+  <a href="chapter1.html">01 新手村</a>
+  <a href="chapter2.html">02 裝備庫</a>
+  <a href="chapter3.html">03 武器庫</a>
+  <a href="chapter4.html">04 冒險小隊</a>
+  <a href="chapter5.html">05 高階心法</a>
+  <a class="current" href="supplement-multi-agent.html">🧩 額外補充</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="badges">
+    <span class="badge">🧩 14 天課程・額外補充教材</span>
+    <span class="badge">Multi-Agent</span>
+    <span class="badge">階層式 · 平行式 · 接力式</span>
+    <span class="badge">OpenCode GUI</span>
+    <span class="badge">繁體中文</span>
+  </div>
+  <h1>Multi-Agent 架構總覽 &amp; OpenCode 部署指南</h1>
+  <p class="sub">
+    一次搞懂多代理的九種組織方式，並在 OpenCode 桌面版 GUI 中實際部署
+    階層式 / 平行式 / 接力式 三種工作流。
+  </p>
+</header>
+
+<div class="wrap">
+
+  <!-- ================= 1 核心三架構 ================= -->
+  <section id="three">
+    <h2><span class="num">1</span> 三大核心架構</h2>
+    <p>Multi-Agent（多代理）系統中，<strong>Sub-Agent（子代理）</strong>是被主代理（Orchestrator，指揮官）委派執行特定任務的獨立代理——每個子代理有自己獨立的上下文、工具與職責。依「誰在控制、彼此如何協作」可分為三大基本型：</p>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">🌳</div>
+        <h4>階層式（Hierarchical）</h4>
+        <span class="tag">中央集權 · 一對多分派</span>
+        <p>指揮官（Orchestrator）負責拆解任務、分配給各專業部屬、彙整結果。子代理之間<b>不直接溝通</b>，一切透過上層。</p>
+        <div class="diagram">        ┌──────────────┐
+        │ Orchestrator │  ← 主控
+        └──────┬───────┘
+        ┌──────┼─────────┐
+        ▼      ▼         ▼
+   [Agent A] [Agent B] [Agent C]</div>
+        <ul>
+          <li><strong>適合</strong>：複雜、可明確分工的任務</li>
+          <li><strong>好處</strong>：控制力強、錯誤易定位</li>
+          <li><strong>代價</strong>：主控是單點瓶頸</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="icon">⚡</div>
+        <h4>平行式（Parallel）</h4>
+        <span class="tag">同時執行 · 最後聚合</span>
+        <p>多個子代理<b>同時進行互不依賴</b>的子任務，全部跑完後由主控統一合併結果。適合可拆成獨立片段的作業。</p>
+        <div class="diagram">      同時啟動
+   ┌─────┼─────┐
+   ▼     ▼     ▼
+ [A]   [B]   [C]     ← 同時跑，互不等待
+   │     │     │
+   └─────┼─────┘
+          ▼
+     合併結果</div>
+        <ul>
+          <li><strong>適合</strong>：批次處理、多方案比較</li>
+          <li><strong>好處</strong>：速度最快、充分利用並行</li>
+          <li><strong>代價</strong>：需有效機制合併結果</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="icon">🔄</div>
+        <h4>接力式（Sequential / Relay）</h4>
+        <span class="tag">流水線 · 前後依賴</span>
+        <p>每個子代理的<b>輸出成為下一個的輸入</b>，嚴格依序執行。前一棒加工完成才交給後一棒。</p>
+        <div class="diagram">[Agent A] → [Agent B] → [Agent C] → 結果
+   擬稿         審稿         翻譯</div>
+        <ul>
+          <li><strong>適合</strong>：研究→規劃→實作→測試</li>
+          <li><strong>好處</strong>：邏輯清晰、每步可檢查</li>
+          <li><strong>代價</strong>：速度=各步之和，前段錯誤會傳播</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 比較表 -->
+    <h3>三者快速比較</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th></th><th>階層式 🌳</th><th>平行式 ⚡</th><th>接力式 🔄</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>控制</td><td>集中式（主控）</td><td>分散 / 匯聚</td><td>線性</td></tr>
+          <tr><td>依賴</td><td>子代理互不依賴</td><td>子代理互不依賴</td><td>嚴格前後依賴</td></tr>
+          <tr><td>速度</td><td>中等</td><td>最快</td><td>最慢</td></tr>
+          <tr><td>容錯</td><td>單點失效（主控）</td><td>部分失敗可容忍</td><td>前段錯誤傳播</td></tr>
+          <tr><td>典型場景</td><td>綜合性複雜任務</td><td>批次 / 比較型任務</td><td>流水線型任務</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= 2 其他六種 ================= -->
+  <section id="others">
+    <h2><span class="num">2</span> 其他六種架構</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="icon">⚔️</div>
+        <h4>辯論式 / 對抗式（Debate）</h4>
+        <span class="tag">互相挑戰 · 法官裁決</span>
+        <p>兩個以上代理各自主張立場並互相質疑，最後由裁決代理產出結論。可防止幻覺。</p>
+        <div class="diagram">[Agent A] ⇄ [Agent B]
+      ↘          ↙
+      [Judge Agent]</div>
+      </div>
+      <div class="card">
+        <div class="icon">📢</div>
+        <h4>市場拍賣式（Auction / Blackboard）</h4>
+        <span class="tag">公告任務 · 自願認領</span>
+        <p>任務貼在共享公告板，各代理依自身能力自願接單。無固定主控。</p>
+        <div class="diagram">┌──────────────────┐
+│  公告板 Blackboard   │  ← 貼出任務
+└──┬─────┬─────┬───┘
+   ▼     ▼     ▼
+ [A出價] [B出價] [C出價]</div>
+      </div>
+      <div class="card">
+        <div class="icon">🐝</div>
+        <h4>社群式 / 蟻群式（Swarm）</h4>
+        <span class="tag">完全去中心 · 湧現行為</span>
+        <p>無單一指揮，代理只靠簡單規則與環境痕跡間接協調，整體湧現智慧。</p>
+        <div class="diagram">🐝 → 發現路徑A
+  🐝 → 發現路徑B
+    🐝 → 標記資訊素
+      → 集體趨向最優路徑</div>
+      </div>
+      <div class="card">
+        <div class="icon">🔁</div>
+        <h4>圈子式 / 環狀管道（Ring + Feedback）</h4>
+        <span class="tag">品質迴圈 · 允許回退</span>
+        <p>接力式的變體，但後段代理可將不合格的前段輸出打回重做，直到品質達標。</p>
+        <div class="diagram">[A] → [B] → [C] → 達標?
+                  ↑______↓ 未達標退回</div>
+      </div>
+      <div class="card">
+        <div class="icon">🧠</div>
+        <h4>專家混合式（Mixture of Agents）</h4>
+        <span class="tag">會診 · 智能聚合</span>
+        <p>多個專家代理以不同專業視角回答同一問題，彙總代理做智能綜合推理（非單純合併）。</p>
+        <div class="diagram">       ┌─────────────┐
+       │ Aggregator 彙總 │
+       └──┬───┬───┬───┘
+          ▼   ▼   ▼
+       [專家A][專家B][專家C]</div>
+      </div>
+      <div class="card">
+        <div class="icon">🚦</div>
+        <h4>動態路由式（Dynamic Routing）</h4>
+        <span class="tag">接線生 · 智能分流</span>
+        <p>輕量路由器依輸入內容動態決定轉交哪個專業代理，如同客服分機系統。</p>
+        <div class="diagram">         ┌──→ [Agent A] 技術
+ Router ─┤
+         ├──→ [Agent B] 法律
+         └──→ [Agent C] 創意</div>
+      </div>
+    </div>
+    <div class="callout">
+      <p><strong>實務重點：</strong>真實系統常是<b>混合式</b>——同一個指揮官底下，某些子代理用平行、某些用接力，再由主控統整。</p>
+    </div>
+  </section>
+
+  <!-- ================= 3 OpenCode 原理 ================= -->
+  <section id="opencode">
+    <h2><span class="num">3</span> OpenCode 的 Multi-Agent 原理</h2>
+    <p>OpenCode（桌面版 GUI）原生支援多代理，其世界觀對應如下：</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>多代理概念</th><th>OpenCode 對應</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Primary Agent（主代理）</td><td>可與你直接對話，<kbd>Tab</kbd> 鍵切換</td></tr>
+          <tr><td>Sub-Agent（子代理）</td><td>主代理用 <strong>Task 工具</strong>呼叫；或你直接 <code>@名字</code> 呼叫</td></tr>
+          <tr><td>階層控制</td><td><code>permission.task</code> 限制主代理能呼叫哪些子代理</td></tr>
+          <tr><td>子 Session</td><td>每個子代理執行時建立 child session，可上下層切換查看</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>內建代理</h3>
+    <div class="grid grid-3">
+      <div class="card">
+        <h4>🛠 build / 📋 plan</h4>
+        <span class="tag">Primary · 主代理</span>
+        <p><strong>build</strong>：全工具開放的工程代理（預設）。<strong>plan</strong>：唯讀規劃代理，不修改程式碼。</p>
+      </div>
+      <div class="card">
+        <h4>🧩 general / 🔍 explore / 🛰 scout</h4>
+        <span class="tag">Subagent · 子代理</span>
+        <p><strong>general</strong>：多步驟研究與平行執行。<strong>explore</strong>：快速唯讀探索程式庫。<strong>scout</strong>：外部文件與依賴研究。</p>
+      </div>
+      <div class="card">
+        <h4>🗜 compaction / title / summary</h4>
+        <span class="tag">Hidden · 隱藏代理</span>
+        <p>系統內部代理，自動壓縮長對話、產生標題與摘要，無法在 UI 選取。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 4 安裝步驟 ================= -->
+  <section id="install">
+    <h2><span class="num">4</span> 在 OpenCode GUI 部署：安裝步驟</h2>
+    <div class="callout yellow">
+      <p><strong>部署 = 建立 Markdown agent 檔案。</strong>放在全局目錄 <code>~/.config/opencode/agents/</code>（所有專案可用）或專案目錄 <code>.opencode/agents/</code>。檔案主體就是該代理的系統 Prompt。</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h3>建立存放資料夾</h3>
+        <p>在 <code>~/.config/opencode/</code> 下手動新增 <code>agents</code> 資料夾（Windows 上為 <code>C:\Users\&lt;用戶名&gt;\.config\opencode\agents\</code>）。</p>
+      </div>
+
+      <div class="step">
+        <h3>建立 5 個代理檔案</h3>
+        <p>一個 <strong>primary 指揮官</strong> + 四個 <strong>subagent 部屬</strong>。</p>
+
+        <p class="fileheader">① orchestrator.md — 指揮官（階層式核心）</p>
+<pre><code><span class="comment">---</span>
+<span class="key">description</span>: <span class="str">指揮官——拆解任務、分派子代理、彙整結果（支援階層/平行/接力）</span>
+<span class="key">mode</span>: <span class="str">primary</span>
+<span class="key">model</span>: <span class="str">opencode/big-pickle</span>
+<span class="key">permission</span>:
+  <span class="key">edit</span>: <span class="str">allow</span>
+  <span class="key">bash</span>: <span class="str">ask</span>
+  <span class="key">task</span>:
+    <span class="str">"*"</span>: <span class="str">"deny"</span>            <span class="comment"># 禁止未授權的內建代理</span>
+    <span class="str">"researcher"</span>: <span class="str">"allow"</span>
+    <span class="str">"implementer"</span>: <span class="str">"allow"</span>
+    <span class="str">"reviewer"</span>: <span class="str">"allow"</span>
+    <span class="str">"relay"</span>: <span class="str">"allow"</span>
+    <span class="str">"explore"</span>: <span class="str">"allow"</span>
+    <span class="str">"general"</span>: <span class="str">"allow"</span>
+<span class="comment">---</span>
+你是 Multi-Agent 指揮官。所有複雜任務依下列流程：
+1. 拆解任務、判斷架構：階層（一對多分派）/ 平行（同時任務）/ 接力（前後依賴）
+2. 平行式：在同一個訊息內用多個 Task 呼叫不同子代理並行推進
+3. 接力式：先 Task(researcher) 取結果，把結果餵入 Task(implementer)，再餵入 Task(reviewer)
+4. 彙整各子代理結果，給出最終交付</code></pre>
+
+        <p class="fileheader">② researcher.md — 研究員（唯讀）</p>
+<pre><code><span class="comment">---</span>
+<span class="key">description</span>: <span class="str">研究員——讀取文件、搜尋程式碼與網路資料，純研究不改檔</span>
+<span class="key">mode</span>: <span class="str">subagent</span>
+<span class="key">model</span>: <span class="str">opencode/big-pickle</span>
+<span class="key">permission</span>:
+  <span class="key">edit</span>: <span class="str">deny</span>
+  <span class="key">bash</span>: <span class="str">deny</span>
+<span class="comment">---</span>
+你是研究員。任務：徹底調查並交出詳細研究報告，絕不修改任何檔案。</code></pre>
+
+        <p class="fileheader">③ implementer.md — 實作者（動手改檔）</p>
+<pre><code><span class="comment">---</span>
+<span class="key">description</span>: <span class="str">實作者——依需求動手寫程式、改檔案</span>
+<span class="key">mode</span>: <span class="str">subagent</span>
+<span class="key">model</span>: <span class="str">opencode/big-pickle</span>
+<span class="key">permission</span>:
+  <span class="key">edit</span>: <span class="str">allow</span>
+  <span class="key">bash</span>: <span class="str">allow</span>
+<span class="comment">---</span>
+你是實作者。任務：依收到的需求實際撰寫 / 修改程式碼。</code></pre>
+
+        <p class="fileheader">④ reviewer.md — 審查員（只提意見）</p>
+<pre><code><span class="comment">---</span>
+<span class="key">description</span>: <span class="str">審查員——審閱程式碼品質、安全性、可維護性，只提意見不改檔</span>
+<span class="key">mode</span>: <span class="str">subagent</span>
+<span class="key">model</span>: <span class="str">opencode/big-pickle</span>
+<span class="key">permission</span>:
+  <span class="key">edit</span>: <span class="str">deny</span>
+  <span class="key">bash</span>: <span class="str">ask</span>
+<span class="comment">---</span>
+你是審查員。任務：檢查程式碼品質、潛在 bug、效能與安全性，只提出意見。</code></pre>
+
+        <p class="fileheader">⑤ relay.md — 接力彙整員（接力終點）</p>
+<pre><code><span class="comment">---</span>
+<span class="key">description</span>: <span class="str">接力彙整員——接收上一棒輸出，加工成下一棒需要的格式</span>
+<span class="key">mode</span>: <span class="str">subagent</span>
+<span class="key">model</span>: <span class="str">opencode/big-pickle</span>
+<span class="key">permission</span>:
+  <span class="key">edit</span>: <span class="str">deny</span>
+  <span class="key">bash</span>: <span class="str">ask</span>
+<span class="comment">---</span>
+你是接力彙整員。任務：接收上一棒的輸出，整理成下一棒需要的輸入格式。</code></pre>
+      </div>
+
+      <div class="step">
+        <h3>重啟 OpenCode 使設定生效</h3>
+        <p>OpenCode 的配置<b>只在啟動時載入，不熱載入</b>。儲存檔案後請<b>完全退出並重新開啟</b> OpenCode，新代理才會出現。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 5 GUI 操作 ================= -->
+  <section id="gui">
+    <h2><span class="num">5</span> GUI 使用方式</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>動作</th><th>操作方式</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>切換主代理</td><td><kbd>Tab</kbd> 鍵，或使用 <code>switch_agent</code> 快捷鍵</td></tr>
+          <tr><td>手動呼叫子代理</td><td>在訊息輸入 <code>@researcher</code>、<code>@reviewer</code>… 直接指定</td></tr>
+          <tr><td>自動分派</td><td>直接下指令給指揮官，它會自己用 Task 工具調度</td></tr>
+          <tr><td>進入子 Session</td><td><kbd>Leader</kbd>+<kbd>↓</kbd>（session_child_first）進入第一個子 session</td></tr>
+          <tr><td>切換子 Session</td><td><kbd>→</kbd> / <kbd>←</kbd> 循環到下一個 / 上一個子 session</td></tr>
+          <tr><td>返回父 Session</td><td><kbd>↑</kbd>（session_parent）回到主對話</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>三種架構在 GUI 中怎麼跑</h3>
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="icon">🌳</div>
+        <h4>階層式</h4>
+        <p>選取指揮官（<kbd>Tab</kbd>），下單一指令。指揮官會依 <code>permission.task</code> 白名單呼叫研究員 / 實作者 / 審查員，最後匯報。</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚡</div>
+        <h4>平行式</h4>
+        <p>指揮官在<b>同一個訊息</b>內發出多個 Task 呼叫即並行。GUI 會建立多個 child session，用 <kbd>←</kbd>/<kbd>→</kbd> 切換看各線進度。</p>
+      </div>
+      <div class="card">
+        <div class="icon">🔄</div>
+        <h4>接力式</h4>
+        <p>指揮官依序 Task(research) → 餵結果給（implement） → 再餵給（review）。每步子代理輸出成為下一步輸入。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 6 驗收 ================= -->
+  <section id="verify">
+    <h2><span class="num">6</span> 驗收清單</h2>
+    <div class="callout green">
+      <p>部署完成後，確認以下三點全部成立：</p>
+    </div>
+    <ol style="margin-left:1.4rem; color:var(--text-dim);">
+      <li style="margin-bottom:.5rem;">重啟後 <strong>GUI 底部出現「指揮官」</strong> agent，可用 <kbd>Tab</kbd> 切換到。</li>
+      <li style="margin-bottom:.5rem;">輸入 <code>@researcher 探索這個資料夾</code> 能成功呼叫研究員並獲得回覆。</li>
+      <li>交代指揮官「研究 → 實作 → 審查」一輪完整任務，確認它會依序呼叫三個子代理。</li>
+    </ol>
+  </section>
+
+  <!-- ================= 7 附錄 ================= -->
+  <section id="appendix">
+    <h2><span class="num">7</span> 附錄：重要設定欄位速查</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>欄位</th><th>說明</th><th>範例值</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>mode</code></td><td>代理類型</td><td><code>primary</code> / <code>subagent</code> / <code>all</code></td></tr>
+          <tr><td><code>model</code></td><td>指定模型（不指定則沿用呼叫者模型）</td><td><code>opencode/big-pickle</code></td></tr>
+          <tr><td><code>permission.task</code></td><td>限制可呼叫的子代理（glob 規則，<b>最後符合者勝</b>）</td><td><code>"*": "deny"</code> + 特定白名單</td></tr>
+          <tr><td><code>permission.edit/bash</code></td><td>工具權限</td><td><code>allow</code> / <code>ask</code> / <code>deny</code></td></tr>
+          <tr><td><code>temperature</code></td><td>創造力控制（0.0–1.0）</td><td><code>0.1</code> 分析 / <code>0.7</code> 發想</td></tr>
+          <tr><td><code>steps</code></td><td>最大迭代步數（上限控管成本）</td><td><code>5</code></td></tr>
+          <tr><td><code>hidden</code></td><td>從 <code>@</code> 選單隱藏（仍可用 Task 呼叫）</td><td><code>true</code></td></tr>
+          <tr><td><code>color</code></td><td>UI 顯示顏色</td><td><code>#7c9cff</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  🧩 額外補充教材 · Multi-Agent 架構總覽 &amp; OpenCode 安裝指南 · 學習_Ai_agent_基礎知識<br>
+  <a href="index.html">← 返回課程首頁</a> ・ <a href="chapter4.html">第四章：冒險小隊 — 多 Agent 協作與安全</a><br>
+  參考：<a href="https://opencode.ai/docs/agents">OpenCode Agents 官方文件</a>
+</footer>
+
+</body>
+</html>
