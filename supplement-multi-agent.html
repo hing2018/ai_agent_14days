@@ -186,7 +186,7 @@
   </div>
   <h1>Multi-Agent 架構總覽 &amp; OpenCode 部署指南</h1>
   <p class="sub">
-    一次搞懂多代理的九種組織方式，並在 OpenCode 桌面版 GUI 中實際部署
+    一次搞懂多代理的各種組織方式（含 Anthropic 11 種系統類型），並在 OpenCode 桌面版 GUI 中實際部署
     階層式 / 平行式 / 接力式 三種工作流。
   </p>
 </header>
@@ -272,7 +272,7 @@
 
   <!-- ================= 2 其他六種 ================= -->
   <section id="others">
-    <h2><span class="num">2</span> 其他六種架構</h2>
+    <h2><span class="num">2</span> 其他架構</h2>
     <div class="grid grid-2">
       <div class="card">
         <div class="icon">⚔️</div>
@@ -332,6 +332,96 @@
  Router ─┤
          ├──→ [Agent B] 法律
          └──→ [Agent C] 創意</div>
+      </div>
+    </div>
+
+    <!-- 補充：11 種 Multi-Agent 系統類型（Anthropic 分類） -->
+    <h3>補充：11 種 Multi-Agent 系統類型（Anthropic 分類）</h3>
+    <p>以下依 <strong>Anthropic</strong> 的研究分類法把多代理體制補齊；<b>上文已介紹者不重覆</b>：<code>Router（路由器）↦ 動態路由式</code>、<code>Parallelization（並行分工）↦ 平行式</code>、<code>Orchestrator-Workers（指揮官-員工）/ Hierarchical（層級式）↦ 階層式</code>、<code>Debate（辯論式）↦ 辯論式</code>（階層式同時涵蓋「單層指揮的 Orchestrator-Workers」與「多層樹狀主管」兩種變體）。以下 9 種為新補充：</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="icon">🧱</div>
+        <h4>切片式（Sectioning）</h4>
+        <span class="tag">平行分工之子型 · 流水線作業</span>
+        <p>任務沿內容切成數塊，各代理<b>同時處理自己那一塊</b>，最後組裝回完整成果。比喻：流水線作業，各切一區塊再組裝。</p>
+        <div class="diagram">切塊      同時處理       組裝
+[塊A] → [Agent A] ┐
+[塊B] → [Agent B] ├→ 組裝 → 完整結果
+[塊C] → [Agent C] ┘</div>
+      </div>
+      <div class="card">
+        <div class="icon">🗳️</div>
+        <h4>投票制（Voting）</h4>
+        <span class="tag">平行分工之子型 · 評審團</span>
+        <p>多個代理<b>各自獨立給出解</b>，再由投票／評分機制選出最佳者。比喻：評審團各自評分，取最高分作品。</p>
+        <div class="diagram">[A解] ┐
+[B解] ├→ 投票/評分 → 選出最佳解
+[C解] ┘</div>
+      </div>
+      <div class="card">
+        <div class="icon">🔻</div>
+        <h4>級聯式（Cascading）</h4>
+        <span class="tag">平行分工之子型 · 漏斗</span>
+        <p>每一層代理接續上一層輸出<b>繼續精煉</b>，先粗篩再細算、寬進窄出。比喻：漏斗式漸進收窄。</p>
+        <div class="diagram">粗 ─────────→ 細
+[A粗篩] → [B中煉] → [C精算] → 收窄結果</div>
+      </div>
+      <div class="card">
+        <div class="icon">✒️</div>
+        <h4>評價-優化（Evaluator-Optimizer）</h4>
+        <span class="tag">寫手+編輯 · 來回迭代</span>
+        <p>一個生成代理負責產出，一個評價代理負責打分與指正，<b>來回迭代直到過關</b>。比喻：「寫手+編輯」循環改稿。</p>
+        <div class="diagram">[Generator 生成] ⇄ [Evaluator 評價]
+        └─── 過關? ──→ 輸出</div>
+      </div>
+      <div class="card">
+        <div class="icon">🤝</div>
+        <h4>協作式（Collaborative）</h4>
+        <span class="tag">平等隊友 · 共享補位</span>
+        <p>無中央指揮，多個<b>地位平等</b>的代理共享資訊、彼此補位，靠共識完成任務。比喻：同隊隊友互相 cover。</p>
+        <div class="diagram">   [A] ⇄ [B]
+    ⇅     ⇅     ← 全員平級、直接共享
+   [C] ⇄ [D]</div>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h4>批評-反思（Critic-Reflector）</h4>
+        <span class="tag">生成+嚴審 · 拉鋸打磨</span>
+        <p>生成代理產出初稿，批評代理以<b>嚴厲標準挑錯並退件</b>，生成代理反思重寫，循環打磨。比喻：設計師與審稿人的拉鋸。</p>
+        <div class="diagram">       初稿            退件＋意見
+[生成者] ──────→ [嚴厲批評者]
+   ↑                    │
+   └──── 反思重寫 ←─────┘</div>
+      </div>
+      <div class="card">
+        <div class="icon">⬛</div>
+        <h4>黑板模式（Blackboard）</h4>
+        <span class="tag">共享工作區 · 實驗室黑板</span>
+        <p>所有代理<b>共用一塊工作區</b>：可寫入中間結果、讀取他人進度再接手。比喻：實驗室共用的黑板討論（上文「市場拍賣式 Auction」即黑板的一種應用——貼任務、自願認領）。</p>
+        <div class="diagram">┌──────────────────┐
+│  共享黑板（工作區）  │ ← 所有人讀/寫
+└──┬────┬────┬──┘
+   ▼    ▼    ▼
+ [A]  [B]  [C]</div>
+      </div>
+      <div class="card">
+        <div class="icon">🕸️</div>
+        <h4>網狀自主式（Mesh / Autonomous）</h4>
+        <span class="tag">專屬通道 · 分散自主</span>
+        <p>每個代理有<b>專屬通訊管道</b>直接互聊、自主尋找合作對象，無中央排程。比喻：群體動物的分散式行為（與社群式 Swarm 的差別：Swarm 靠環境間接痕跡，Mesh 直接互聯）。</p>
+        <div class="diagram"> [A]───[B]
+  │ ╲ ╱ │
+  │ ╳ ╳ │  ← 全互聯、自主找對象
+  │ ╱ ╲ │
+ [C]───[D]</div>
+      </div>
+      <div class="card">
+        <div class="icon">🧪</div>
+        <h4>生成-驗證（Generator-Verifier）</h4>
+        <span class="tag">產出/把關分離 · 品質雙閘</span>
+        <p>生成代理與驗證代理<b>完全分離</b>：生成者只產出，驗證者獨立把關、不合格即退回。比喻：出題者與閱卷官分開，避免自己出題自己改。</p>
+        <div class="diagram">[Generator 生成] → [Verifier 驗證] → 合格? → 輸出
+                           └── 不合格退回</div>
       </div>
     </div>
     <div class="callout">
